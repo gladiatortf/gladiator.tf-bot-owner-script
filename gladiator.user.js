@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.5
+// @version      1.6
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic
 // @grant        none
@@ -12,13 +12,13 @@
 // @downloadURL     https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
 
 // @run-at       document-end
-// @match        ^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\/stats\/
+// @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\/stats\//
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    if (window.location.href.startsWith('https://backpack.tf/stats')) {
+    if (window.location.href.includes('/stats')) {
         $('.price-boxes').append(
             `<a class="price-box" href="https://gladiator.tf/manage/my/item/${encodeURIComponent($('.stats-header-title').text().trim())}/add" target="_blank" data-tip="top" data-original-title="Gladiator.tf">
                 <img src="https://gladiator.tf/favicon-96x96.png" alt="gladiator">
