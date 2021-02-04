@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.4
+// @version      1.5
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic
 // @grant        none
@@ -12,7 +12,7 @@
 // @downloadURL     https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
 
 // @run-at       document-end
-// @match        https://backpack.tf/*
+// @match        ^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\/stats\/
 // ==/UserScript==
 
 (function() {
