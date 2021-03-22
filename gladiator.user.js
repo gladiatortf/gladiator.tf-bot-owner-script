@@ -13,6 +13,7 @@
 
 // @run-at       document-end
 // @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\//
+// @require https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js 
 // ==/UserScript==
 
 (function() {
