@@ -12,11 +12,19 @@
 // @downloadURL     https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
 
 // @run-at       document-end
-// @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\/stats\//
+// @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\//
+// @require https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js 
 // ==/UserScript==
+
 
 (function() {
     'use strict';
+  
+    for (let i of document.getElementsByClassName('price-box')) {
+      if (i.origin === 'https://gladiator.tf') { 
+        return;
+      }
+    }
 
     if (window.location.href.includes('/stats')) {
         $('.price-boxes').append(
