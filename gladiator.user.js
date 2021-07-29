@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.7
+// @version      1.8
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic
 // @grant        none
@@ -13,7 +13,6 @@
 
 // @run-at       document-end
 // @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\//
-// @require https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js 
 // ==/UserScript==
 
 
