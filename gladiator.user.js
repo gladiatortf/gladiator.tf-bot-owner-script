@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Gladiator.tf bot owner script
+// @name         Gladiator.tf bot owner script debug
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
 // @version      1.8
 // @description  A script for owners of bots on gladiator.tf
@@ -15,10 +15,42 @@
 // @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\//
 // ==/UserScript==
 
+const keyEx = /(\d*(?= keys?))/;
+const refEx = /\d*(.\d*)?(?= ref)/;
+
+
+function parseListingPrice(price){
+    return {
+        keys:  parseFloat(keyEx.exec(price) ? keyEx.exec(price).shift() : 0),
+        metal: parseFloat(refEx.exec(price) ? refEx.exec(price).shift() : 0)
+    };
+}
+
+function spawnButton(element){
+    element = $(element);
+    const info = element.find('.item');
+    const price = parseListingPrice(info.data('listing_price') || "");
+    console.log(price);
+    const match = `<a  href="https://127.0.0.1/manage/my/item/${encodeURIComponent((info.prop('title') || info.data('original-title')).trim())}?keys=${price.keys}&metal=${price.metal}&intent=${info.data('listing_intent')}" title="Match this user's price" target="_blank" class="btn btn-bottom btn-xs btn-success">
+            <i class="fa fa-sw fa-tags"></i>
+        </a>`;
+    
+
+    element.find(".listing-buttons").append(match);
+    
+    
+}
 
 (function() {
     'use strict';
-  
+    
+    $(document).ready(function(){
+        $('[title="Gladiator.tf Instant Trade"]').css('margin-right','3px');
+
+        //javascript nonsense
+        window.jQuery('.fa-tags').parent().tooltip();
+    }); 
+
     for (let i of document.getElementsByClassName('price-box')) {
       if (i.origin === 'https://gladiator.tf') { 
         return;
@@ -52,4 +84,12 @@
             clearInterval(id);
         }, 750);
     });
+
+    if(window.location.href.includes('/stats') || window.location.href.includes('/classifieds')) {
+        let sellers = $($(".media-list")[0]);
+        let buyers = $($(".media-list")[1]);
+        sellers.find(".listing").each(function(){spawnButton(this)});
+        buyers.find(".listing").each(function(){spawnButton(this)});
+          
+    }
 })();
