@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.8
+// @version      1.9
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic
 // @grant        none
@@ -30,7 +30,7 @@ function spawnButton(element){
     element = $(element);
     const info = element.find('.item');
     const price = parseListingPrice(info.data('listing_price') || "");
-    const match = `<a  href="https://127.0.0.1/manage/my/item/${encodeURIComponent((info.prop('title') || info.data('original-title')).trim())}?keys=${price.keys}&metal=${price.metal}&intent=${info.data('listing_intent')}" title="Match this user's price" target="_blank" class="btn btn-bottom btn-xs btn-success">
+    const match = `<a  href="https://gladiator.tf/manage/my/item/${encodeURIComponent((info.prop('title') || info.data('original-title')).trim())}?keys=${price.keys}&metal=${price.metal}&intent=${info.data('listing_intent')}" title="Match this user's price" target="_blank" class="btn btn-bottom btn-xs btn-success">
             <i class="fa fa-sw fa-tags"></i>
         </a>`;
     
