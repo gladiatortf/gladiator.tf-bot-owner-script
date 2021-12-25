@@ -35,7 +35,7 @@ function spawnButton(element){
         </a>`;
     
 
-    element.find(".listing-buttons").append(match);
+    element.find(".listing-buttons").prepend(match);
 }
 
 (function() {
