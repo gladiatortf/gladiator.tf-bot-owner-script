@@ -12,7 +12,7 @@
 // @downloadURL     https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
 
 // @run-at       document-end
-// @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\//
+// @include      /^https?:\/\/(.*\.)?((backpack)|(gladiator))\.tf(:\d+)?\//
 // ==/UserScript==
 
 const keyEx = /(\d*(?= keys?))/;
