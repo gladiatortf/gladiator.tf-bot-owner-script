@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Gladiator.tf bot owner script debug
+// @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
 // @version      1.9
 // @description  A script for owners of bots on gladiator.tf
