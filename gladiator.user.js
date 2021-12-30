@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Gladiator.tf bot owner script
+// @name         Gladiator.tf bot owner script debug
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
 // @version      1.9
 // @description  A script for owners of bots on gladiator.tf
@@ -26,6 +26,21 @@ function parseListingPrice(price){
     };
 }
 
+function hasBlacklistedProperties(info){
+    if( 
+        info.data('paint_name')     !== undefined || 
+        info.data('spell_1')        !== undefined || 
+        info.data('part_price_1')   !== undefined || 
+        info.data('killstreaker')   !== undefined ||
+        info.data('sheen')          !== undefined 
+    ){
+        return true;
+    }
+       
+    else 
+        return false;
+}
+
 function spawnButton(element){
     element = $(element);
     const info = element.find('.item');
@@ -34,8 +49,8 @@ function spawnButton(element){
             <i class="fa fa-sw fa-tags"></i>
         </a>`;
     
-
-    element.find(".listing-buttons").prepend(match);
+    if(!hasBlacklistedProperties(info) || info.data('listing_intent') === "sell" )
+        element.find(".listing-buttons").prepend(match);
 }
 
 (function() {
