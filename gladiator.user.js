@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.8
+// @version      1.9
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic
 // @grant        none
@@ -12,13 +12,57 @@
 // @downloadURL     https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
 
 // @run-at       document-end
-// @include      /^https?:\/\/(.*\.)?backpack\.tf(:\d+)?\//
+// @include      /^https?:\/\/(.*\.)?((backpack)|(gladiator))\.tf(:\d+)?\//
 // ==/UserScript==
 
+const keyEx = /(\d*(?= keys?))/;
+const refEx = /\d*(.\d*)?(?= ref)/;
+
+
+function parseListingPrice(price){
+    return {
+        keys:  parseFloat(keyEx.exec(price) ? keyEx.exec(price).shift() : 0),
+        metal: parseFloat(refEx.exec(price) ? refEx.exec(price).shift() : 0)
+    };
+}
+
+function hasBlacklistedProperties(info){
+    if( 
+        info.data('paint_name')     !== undefined || 
+        info.data('spell_1')        !== undefined || 
+        info.data('part_price_1')   !== undefined || 
+        info.data('killstreaker')   !== undefined ||
+        info.data('sheen')          !== undefined 
+    ){
+        return true;
+    }
+       
+    else 
+        return false;
+}
+
+function spawnButton(element){
+    element = $(element);
+    const info = element.find('.item');
+    const price = parseListingPrice(info.data('listing_price') || "");
+    const match = `<a  href="https://gladiator.tf/manage/my/item/${encodeURIComponent((info.prop('title') || info.data('original-title')).trim())}?keys=${price.keys}&metal=${price.metal}&intent=${info.data('listing_intent')}" title="Match this user's price" target="_blank" class="btn btn-bottom btn-xs btn-success">
+            <i class="fa fa-sw fa-tags"></i>
+        </a>`;
+    
+    if(!hasBlacklistedProperties(info) || info.data('listing_intent') === "sell" )
+        element.find(".listing-buttons").prepend(match);
+}
 
 (function() {
     'use strict';
-  
+    
+    $(document).ready(function(){
+        $('[title="Gladiator.tf Instant Trade"]').css('margin-right','3px');
+
+        //javascript nonsense
+        window.jQuery('.fa-tags').parent().tooltip();
+    }); 
+
     for (let i of document.getElementsByClassName('price-box')) {
       if (i.origin === 'https://gladiator.tf') { 
         return;
@@ -52,4 +96,12 @@
             clearInterval(id);
         }, 750);
     });
+
+    if(window.location.href.includes('/stats') || window.location.href.includes('/classifieds')) {
+        let sellers = $($(".media-list")[0]);
+        let buyers = $($(".media-list")[1]);
+        sellers.find(".listing").each(function(){spawnButton(this)});
+        buyers.find(".listing").each(function(){spawnButton(this)});
+          
+    }
 })();
