@@ -66,7 +66,7 @@ const Settings = {
             <h4>Choose The Bot</h4>
             <hr>
             </div>`);
-            (botAmount > 0 ? $select : $(`<span>You dont have multiple bots, or if you do, <a href="${'https://127.0.0.1' + '/manage?kickback=true'}">view your manage page</a> to refresh</span>`)).insertAfter($bots.find("hr"));
+            (botAmount > 0 ? $select : $(`<span>You dont have multiple bots, or if you do, <a href="https://${GLAD_DOMAIN + '/manage?kickback=true'}">view your manage page</a> to refresh</span>`)).insertAfter($bots.find("hr"));
             $parent.append($bots);
         
             return $parent;
@@ -351,9 +351,6 @@ function backpackUserscript(pathname){
         addAllUnPriced: $(`<a class="btn btn-default" target="_blank"><i class="fas fa-plus-circle"></i>Add all unpriced unusuals</a>`),
         check: $(`<div class="" target="_blank"><input type="checkbox" id="store-check">Store to Add Later</div>`)
     }
-
-    $('.price-boxes').append($(`<button>test</button>`).on('click', ()=>{Settings.data.bots = {}}));
-
 }
 
 function gladiatorUserscript(pathname){
