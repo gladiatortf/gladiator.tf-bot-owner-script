@@ -363,7 +363,7 @@ let buttons = {};
     'use strict';
     const entrypoints = {
         "(gladiator\.tf)|(127.0.0.1)": gladiatorUserscript,
-        "backpack\.tf": backpackUserscript
+        "backpack\.tf|(gladiator\.tf:2053)|(127.0.0.1:2053)": backpackUserscript
     }
     Settings.load().then(()=>{
         execOnRegexMatch(entrypoints, window.location.origin, [window.location.pathname]);
