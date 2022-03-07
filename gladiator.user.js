@@ -26,6 +26,19 @@ const svg = {
     </svg>`
 }
 
+const css = {
+    bptf: `
+        .gladiatortf-add > div {
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            cursor:pointer; 
+            margin-top: 0;
+        }
+    `
+}
+
 /** @typedef {{ bots: Bots, manageContext: string }} SettingsData */
 
 /** @typedef { Object<string, string> } Bots */
@@ -55,18 +68,18 @@ const Settings = {
             const $parent = $("<form id='glad-settings'></form>");
         
             const botAmount = Object.keys(Settings.data.bots).length;
-            const $select = $("<select name='manageContext'></select>");
+            const $select = $("<select id='manageContext' name='manageContext' class='form-control'></select>");
             console.log(Settings.data.bots);
             console.log(Object.entries(Settings.data.bots));
             Object.entries(Settings.data.bots).forEach((bot)=>{
                 $select.append(`<option value="${bot[1]}" ${Settings.data.manageContext === bot[1] ? 'selected' : ''}>${bot[0]}</option>`)
             })
         
-            const $bots = $(`<div>
-            <h4>Choose The Bot</h4>
-            <hr>
-            </div>`);
-            (botAmount > 0 ? $select : $(`<span>You dont have multiple bots, or if you do, <a href="https://${GLAD_DOMAIN + '/manage?kickback=true'}">view your manage page</a> to refresh</span>`)).insertAfter($bots.find("hr"));
+            const $bots = $(`<div class="form-group">
+                                <label for="manageContext">Choose Your Bot</label>
+                            </div>`);
+
+            (botAmount > 0 ? $select : $(`<span>You dont have multiple bots, or if you do, <a href="https://${GLAD_DOMAIN + '/manage?kickback=true'}">view your manage page</a> to refresh</span>`)).insertAfter($bots.find("label"));
             $parent.append($bots);
         
             return $parent;
@@ -267,7 +280,7 @@ function backpackUserscript(pathname){
         const $svg =  
         $(`<a class="price-box" data-tip="top" data-original-title="Gladiator.tf">
                 ${svg.options}
-                <div class="text" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0;">
+                <div class="text" style="display: flex; flex-direction: column; align-items: center; justify-content: center; custor:pointer; margin-top: 0;">
                     <div class="value" style="font-size: 14px;">Settings</div>
                 </div>
             </a>`)
@@ -283,9 +296,9 @@ function backpackUserscript(pathname){
     // The add on gladiator button on Stats
     function bpStatsAdd(){
         const $addButton = $(`
-            <a class="price-box gladiator-context" data-postfix="/item/${encodeURIComponent($('.stats-header-title').text().trim())}/add" target="_blank" data-tip="top" data-original-title="Gladiator.tf">
+            <a class="price-box gladiator-context gladiatortf-add" data-postfix="/item/${encodeURIComponent($('.stats-header-title').text().trim())}/add" target="_blank" data-tip="top" data-original-title="Gladiator.tf">
                 <img src="https://gladiator.tf/favicon-96x96.png" alt="gladiator">
-                <div class="text" style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 0;">
+                <div class="text">
                     <div class="value" style="font-size: 14px;">Add on Gladiator.tf</div>
                 </div>
             </a>
@@ -344,6 +357,7 @@ function backpackUserscript(pathname){
 
     execOnRegexMatch(patterns, pathname);
     reloadManageLink();
+    injectCSS(css.bptf);
     
     buttons = {
         addAll: $(`<a class="btn btn-default" target="_blank"><i class="fas fa-plus-circle"></i>Add all</a>`),
@@ -401,3 +415,5 @@ let buttons = {};
         }
     })
 }
+
+const injectCSS = (css) => $(document).find('head').append(`<style>${css}</style>`);
