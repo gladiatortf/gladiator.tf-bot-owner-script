@@ -24,5 +24,6 @@ If you own multiple bots, you may want to configure which one the "Add on Gladia
 This can be done in the extension settings.
 
 To access the settings you click on your user icon on bp and then "Bot Settings"
+
 ![image](https://user-images.githubusercontent.com/18314046/157110039-0b89b1c7-c8a1-4809-a066-d10179b054a6.png)
 
