@@ -277,6 +277,13 @@ async function appendCheck(selector){
 
 function backpackUserscript(pathname){
     function settings(){
+
+        const modal = [
+            'Settings', 
+            Settings.form.render(), 
+            $('<a class="btn btn-default" data-dismiss="modal">Save</a>')
+        ];
+
         const $svg =  
         $(`<a class="price-box" data-tip="top" data-original-title="Gladiator.tf">
                 ${svg.options}
@@ -284,11 +291,11 @@ function backpackUserscript(pathname){
                     <div class="value" style="font-size: 14px;">Settings</div>
                 </div>
             </a>`)
-        .on('click', () => Modal.render('Settings', Settings.form.render()).$base
-                                .on('hide.bs.modal', () => {
-                                    Settings.form.submit();
-                                    reloadManageLink();
-                                }));
+        .on('click', () =>  Modal.render(...modal).$base
+                            .on('hide.bs.modal', () => {
+                                Settings.form.submit();
+                                reloadManageLink();
+                            }));
     
         $('.price-boxes').append($svg);   
     }
