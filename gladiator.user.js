@@ -6,6 +6,8 @@
 // @author       manic, moder112
 // @grant        GM.getValue
 // @grant        GM.setValue
+// @grant        GM_xmlhttpRequest
+// @connect      gladiator.tf
 // @license      MIT
 
 // @homepageURL     https://github.com/mninc/gladiator.tf-bot-owner-script
@@ -58,7 +60,7 @@ const css = {
     `
 }
 
-/** @typedef {{ bots: Bots, manageContext: string }} SettingsData */
+/** @typedef {{ bots: Bots, lastCache: Date, manageContext: string }} SettingsData */
 
 /** @typedef { Object<string, string> } Bots */
 
@@ -66,6 +68,7 @@ const Settings = {
     /** @type {SettingsData} */
     data: {
         manageContext: 'my',
+        lastCache: new Date().setDate(new Date().getDate() - 1),
         bots: {}
     },
     /** @returns {Promise<SettingsData>} */
@@ -73,7 +76,7 @@ const Settings = {
         return new Promise((resolve)=>{
             GM.getValue('settings', JSON.stringify(Settings.data)).then((settings)=>{
                 const parsed = JSON.parse(settings);
-                Settings.data = parsed;
+                Settings.data = Object.assign(Settings.data, parsed);
                 resolve(parsed);
             })
         });
@@ -98,7 +101,7 @@ const Settings = {
                                 <label for="manageContext">Choose Your Bot</label>
                             </div>`);
 
-            (botAmount > 0 ? $select : $(`<span>You dont have multiple bots, or if you do, <a href="https://${GLAD_DOMAIN + '/manage?kickback=true'}">view your manage page</a> to refresh</span>`)).insertAfter($bots.find("label"));
+            (botAmount > 0 ? $select : $(`<span>You dont have any bots</span>`)).insertAfter($bots.find("label"));
             $parent.append($bots);
         
             return $parent;
@@ -113,30 +116,43 @@ const Settings = {
         }
     },
     updateBotData: ()=>{
-        /** @returns {Bots|null} */
-        function fetchBotData(){
-            /**
-             * @type {JQuery<HTMLFormElement>}
-             */
-            const form = $("#userBots");
-            if(form.length === 0 || !form.serializeArray)
-                return null;
-            
-            let formData = {};
-            form.serializeArray().forEach((entry)=>formData[entry.name] = entry.value);
 
-            return formData;
+        if(new Date(Settings.data.lastCache).getDate() === new Date().getDate()) {
+            console.log('less than a day passed');
+            return;
         }
 
-        let fetched = fetchBotData();
-
-        if(fetched !== null){
-            Settings.data.bots = fetched;
+        /** @returns {Promise<Bots>} */
+        function fetchBotData(){
+            return new Promise((resolve, reject)=>{
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: `https://${GLAD_DOMAIN}/api/bots/my`,
+                    onload: function (data) {
+                        console.log('return');
+                        data = JSON.parse(data.responseText);
+                        if (!data.success) return reject(data);
             
-            console.log({msg: "Fetched data from /manage", bots: Settings.data.bots});
+                        let bots = data.bots;
+                        resolve(bots);
+                    },
+                    onerror: reject
+                });
+            });
+        }
+
+        fetchBotData().then((bots)=>{
+            Settings.data.bots = bots;
+            Settings.data.lastCache = new Date();
+            
+            console.log({msg: "Fetched bot data", bots});
 
             Settings.save();
-        }
+        }).catch((error)=>{
+            console.error(error);
+        })
+
+        
     }
 }
 
@@ -386,7 +402,6 @@ function backpackUserscript(pathname){
 }
 
 function gladiatorUserscript(pathname){
-    if(pathname === '/manage') Settings.updateBotData();
     $('body').attr('data-extension-active', true);
 };
 
@@ -397,7 +412,10 @@ let buttons = {};
         "(gladiator\.tf)|(127.0.0.1)": gladiatorUserscript,
         "backpack\.tf|(gladiator\.tf:2053)|(127.0.0.1:2053)": backpackUserscript
     }
-    Settings.load().then(()=>{
+    Settings.load().then((data)=>{
+        console.log(['Fetched data from storage', data]);
+        
+        Settings.updateBotData();
         execOnRegexMatch(entrypoints, window.location.origin, [window.location.pathname]);
     });
 })();
