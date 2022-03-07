@@ -145,6 +145,10 @@ const Settings = {
             Settings.data.bots = bots;
             Settings.data.lastCache = new Date();
             
+            if(Object.keys(bots).length > 0 && Settings.data.manageContext === 'my'){
+                Settings.data.manageContext = bots[Object.keys(bots)[0]];
+            }
+
             console.log({msg: "Fetched bot data", bots});
 
             Settings.save();
