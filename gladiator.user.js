@@ -20,14 +20,26 @@
 var GLAD_DOMAIN = "gladiator.tf"
 
 const svg = {
-    options: `<svg style="width:36px;height:36px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33.23 36.96">
-        <path fill="#fbb040" d="M19.67 0 13.3 1.78l2.4 5.33c-.22.1-.4.2-.65.34l-.43.21a16.86 16.86 0 0 0-3.41 2.5l-4-4.33-4.07 4.97 5.02 3.02c-.17.27-.35.55-.49.8a18.22 18.22 0 0 0-1.63 4.54l-.03.2-5.7-1.25-.3 6.6 5.78-.47A16.4 16.4 0 0 0 7 29.18l-5.36 2.3 3.31 5.48 5.74-4.7 3.52-2.8c0-.02-.03-.04-.04-.06l-.2-.27-.39-.54a9.62 9.62 0 0 1-1-1.78v-.02a10.3 10.3 0 0 1-.8-3.05 7.94 7.94 0 0 1 0-1.8l.03-.29c.04-.32.08-.65.14-.96.18-1.07.5-2.1 1.06-3.16.12-.2.25-.37.37-.56.27-.43.56-.83.87-1.2l.05-.06a15.61 15.61 0 0 1 2.24-2.15c.57-.36 1.1-.64 1.64-.9a9.8 9.8 0 0 1 2.1-.74l.74-.14.08-.01c.3-.04.63-.08.97-.1a13.16 13.16 0 0 1 4.02.61l.17.05c.4.12.8.28 1.19.44l.26.1 1.04-1.97 4.48-8.45L27.2.25 26 6a16.75 16.75 0 0 0-5.64-.24L19.67 0z"/>
-        <path fill="#fff" d="M19.22 12.87c-.9.36-1.76.82-2.55 1.37a10.4 10.4 0 0 0-3.17 3.57 9.92 9.92 0 0 0-1.17 4.85 9.87 9.87 0 0 0 1.19 4.8 10.28 10.28 0 0 0 3.2 3.57 9.5 9.5 0 0 0 2.47 1.28c.9.31 1.86.47 2.82.47h1a8 8 0 0 0 2.82-.51c.9-.34 1.75-.79 2.55-1.33.5-.36.97-.76 1.4-1.19v-7.7h-5.85l-2.65 3.49H25v2c-.71.36-1.5.55-2.29.55h-.29a6.21 6.21 0 0 1-2.08-.43 4.94 4.94 0 0 1-2.86-2.93 6.35 6.35 0 0 1 0-4.2c.22-.7.6-1.35 1.13-1.87a6.62 6.62 0 0 1 1.87-1.29c.69-.33 1.44-.5 2.2-.51.51 0 1.02.06 1.52.17l-1.38 1.63h4.28l2.73-3.28a9.56 9.56 0 0 0-6.55-3.1 8.35 8.35 0 0 0-4.06.59Z" data-name="Layer 1"/>
-    </svg>`
+    options: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33.2 37">
+    <path fill="#333" d="m19.7 0-6.4 1.8L15.7 7l-.6.4-.5.2a16.9 16.9 0 0 0-3.4 2.5l-4-4.4-4 5 5 3-.5.8A18.2 18.2 0 0 0 6 19.2v.2L.3 18 0 24.7l5.8-.5a16.4 16.4 0 0 0 1.2 5l-5.4 2.3L5 37l5.8-4.7 3.5-2.8v-.1l-.2-.3-.4-.5a9.6 9.6 0 0 1-1-1.8 10.3 10.3 0 0 1-.8-3 8 8 0 0 1 0-1.9v-.3l.1-1c.2-1 .5-2 1.1-3l.4-.6c.2-.5.5-.9.8-1.2h.1a15.6 15.6 0 0 1 2.2-2.2 16 16 0 0 1 1.7-1 9.8 9.8 0 0 1 2-.7l.8-.1h.1l1-.1a13.2 13.2 0 0 1 4 .6h.2l1.1.5h.3l1-1.9 4.5-8.5-6-2.1L26 6a16.8 16.8 0 0 0-5.6-.2L19.7 0z"/>
+    <path fill="#333" d="M19.2 12.9c-.9.3-1.7.8-2.5 1.3a10.4 10.4 0 0 0-3.2 3.6 10 10 0 0 0-1.2 4.9 9.9 9.9 0 0 0 1.2 4.8 10.3 10.3 0 0 0 3.2 3.5 9.5 9.5 0 0 0 2.5 1.3c.9.3 1.8.5 2.8.5h1a8 8 0 0 0 2.8-.5 12.4 12.4 0 0 0 4-2.6V22h-5.9l-2.6 3.5H25v2a5 5 0 0 1-2.3.6h-.3a6.2 6.2 0 0 1-2-.4 5 5 0 0 1-3-3 6.3 6.3 0 0 1 0-4.2c.3-.7.7-1.3 1.2-1.8a6.6 6.6 0 0 1 1.9-1.3c.7-.4 1.4-.5 2.2-.5l1.5.1-1.4 1.7h4.3l2.7-3.3a9.6 9.6 0 0 0-6.5-3.1 8.3 8.3 0 0 0-4 .6Z" data-name="Layer 1"/>
+  </svg>
+  `
 }
 
 const css = {
     bptf: `
+        .li-gladiator-options a {
+            display: flex!important;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .li-gladiator-options svg{
+            width: 1.25em;
+            height: 1.25em;
+            margin-right: 3px;
+        }
+
         .gladiatortf-add > div {
             display: flex; 
             flex-direction: column; 
@@ -283,21 +295,14 @@ function backpackUserscript(pathname){
             Settings.form.render(), 
             $('<a class="btn btn-default" data-dismiss="modal">Save</a>')
         ];
-
-        const $svg =  
-        $(`<a class="price-box" data-tip="top" data-original-title="Gladiator.tf">
-                ${svg.options}
-                <div class="text" style="display: flex; flex-direction: column; align-items: center; justify-content: center; custor:pointer; margin-top: 0;">
-                    <div class="value" style="font-size: 14px;">Settings</div>
-                </div>
-            </a>`)
-        .on('click', () =>  Modal.render(...modal).$base
-                            .on('hide.bs.modal', () => {
-                                Settings.form.submit();
-                                reloadManageLink();
-                            }));
-    
-        $('.price-boxes').append($svg);   
+        const $settings = $(`<li class="li-gladiator-options"><a>${svg.options} Bot Settings</a> </li>`);
+        $settings.on('click', () =>  Modal.render(...modal).$base
+                                    .on('hide.bs.modal', () => {
+                                        Settings.form.submit();
+                                        reloadManageLink();
+                                    }));
+                            
+        $('[href="/settings"]').parent().after($settings);
     }
 
     // The add on gladiator button on Stats
@@ -353,13 +358,12 @@ function backpackUserscript(pathname){
         }
     }
 
-    const classiesAndStats = [bpPopupAdd, bpStatsAdd, addMatchButtons];
 
     const patterns = {
-        "\/stats":      [...classiesAndStats, settings],
-        "\/classifieds":[...classiesAndStats],
-        "effect\/":     [bpPopupAdd, settings /*, effect */ ],
-        "unusual\/":    [bpPopupAdd, settings /*, unusual */]
+        ".*": [settings],
+        "(\/stats)|(\/classifieds)": [bpPopupAdd, bpStatsAdd, addMatchButtons],
+        "effect\/":     [bpPopupAdd /*, effect */ ],
+        "unusual\/":    [bpPopupAdd /*, unusual */]
     };
 
     execOnRegexMatch(patterns, pathname);
