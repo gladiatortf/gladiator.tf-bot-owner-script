@@ -209,7 +209,7 @@ function addMatchButtons(){
     buyers  .find(".listing").each(spawnMatchButton);
 
     // what the fuck
-    globalThis.unsafeWindow.jQuery('.fa-tags').parent().tooltip(); // VERY gross hack for tooltips
+    globalThis.jQuery('.fa-tags').parent().tooltip(); // VERY gross hack for tooltips
 }
 
 // TODO: To be added later, do not remove returns
@@ -385,6 +385,8 @@ function backpackUserscript(pathname){
         }
     }
 
+    reloadManageLink();
+    injectCSS(css.bptf);
 
     const patterns = {
         ".*": [settings],
@@ -394,8 +396,6 @@ function backpackUserscript(pathname){
     };
 
     execOnRegexMatch(patterns, pathname);
-    reloadManageLink();
-    injectCSS(css.bptf);
     
     buttons = {
         addAll: $(`<a class="btn btn-default" target="_blank"><i class="fas fa-plus-circle"></i>Add all</a>`),
