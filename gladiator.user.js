@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.13
+// @version      1.14
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -209,7 +209,7 @@ function addMatchButtons(){
     buyers  .find(".listing").each(spawnMatchButton);
 
     // what the fuck
-    globalThis.unsafeWindow.jQuery('.fa-tags').parent().tooltip(); // VERY gross hack for tooltips
+    document.defaultView.jQuery('.fa-tags').parent().tooltip(); // VERY gross hack for tooltips
 }
 
 // TODO: To be added later, do not remove returns
@@ -385,6 +385,8 @@ function backpackUserscript(pathname){
         }
     }
 
+    reloadManageLink();
+    injectCSS(css.bptf);
 
     const patterns = {
         ".*": [settings],
@@ -394,8 +396,6 @@ function backpackUserscript(pathname){
     };
 
     execOnRegexMatch(patterns, pathname);
-    reloadManageLink();
-    injectCSS(css.bptf);
     
     buttons = {
         addAll: $(`<a class="btn btn-default" target="_blank"><i class="fas fa-plus-circle"></i>Add all</a>`),
