@@ -209,7 +209,7 @@ function addMatchButtons(){
     buyers  .find(".listing").each(spawnMatchButton);
 
     // what the fuck
-    globalThis.jQuery('.fa-tags').parent().tooltip(); // VERY gross hack for tooltips
+    document.defaultView.jQuery('.fa-tags').parent().tooltip(); // VERY gross hack for tooltips
 }
 
 // TODO: To be added later, do not remove returns
