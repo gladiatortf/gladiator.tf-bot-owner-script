@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.12
+// @version      1.13
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -110,7 +110,7 @@ const Settings = {
             const formArray = $('#glad-settings').serializeArray();
             let formData = {};
             formArray.forEach((entry)=>formData[entry.name] = entry.value);
-        
+
             Settings.data.manageContext = formData['manageContext'] ? formData['manageContext'] : 'my';
             Settings.save();
         }
@@ -369,7 +369,7 @@ function backpackUserscript(pathname){
 
     // After settings are changed we gotta update the links
     function reloadManageLink(){
-        const { manageContext } = Settings.data;
+        const manageContext = Settings.data.manageContext || "my";
         
         $('.gladiator-context').each(function(){
             $(this).attr('href', `https://${GLAD_DOMAIN}/manage/${manageContext}${$(this).data('postfix')}`); 
