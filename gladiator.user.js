@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.14
+// @version      1.16
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -392,7 +392,6 @@ function backpackUserscript(pathname){
     }catch(ex){
         console.error(ex);
     }
-
     reloadManageLink();
 }
 
