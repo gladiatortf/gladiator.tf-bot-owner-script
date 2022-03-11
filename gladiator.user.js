@@ -52,6 +52,14 @@ const css = {
             cursor:pointer; 
             margin-top: 0;
         }
+
+        .glad-reload {
+            pointer-events: none;
+        }
+        .glad-reload button{
+            pointer-events:all;
+        }
+
         @media (max-width: 958.999px){
             path {
                 fill: #888!important;
@@ -100,9 +108,22 @@ const Settings = {
             const $bots = $(`<div class="form-group">
                                 <label for="manageContext">Choose Your Bot</label>
                             </div>`);
+            const $reload = $(`<div class="form-group glad-reload"><button class="btn btn-variety ">Reload Bots</button></div>`);
+            $reload.on('click', (e)=>{
+                
+                Settings.data.lastCache = 0;
+                Settings.updateBotData().then(()=>{
+                    $parent.remove();
+                    $('#active-modal .modal-body').append(Settings.form.render());
+                    
+                })
+                e.preventDefault();
+            });
+
 
             (botAmount > 0 ? $select : $(`<span>You dont have any bots</span>`)).insertAfter($bots.find("label"));
             $parent.append($bots);
+            $bots.after($reload);
         
             return $parent;
         },
@@ -116,47 +137,48 @@ const Settings = {
         }
     },
     updateBotData: ()=>{
-
-        if(new Date(Settings.data.lastCache).getDate() === new Date().getDate()) {
-            console.log('less than a day passed');
-            return;
-        }
-
-        /** @returns {Promise<Bots>} */
-        function fetchBotData(){
-            return new Promise((resolve, reject)=>{
-                GM_xmlhttpRequest({
-                    method: "GET",
-                    url: `https://${GLAD_DOMAIN}/api/bots/my`,
-                    onload: function (data) {
-                        console.log('return');
-                        data = JSON.parse(data.responseText);
-                        if (!data.success) return reject(data);
+        return new Promise((resolve)=>{
             
-                        let bots = data.bots;
-                        resolve(bots);
-                    },
-                    onerror: reject
-                });
-            });
-        }
-
-        fetchBotData().then((bots)=>{
-            Settings.data.bots = bots;
-            Settings.data.lastCache = new Date();
-            
-            if(Object.keys(bots).length > 0 && Settings.data.manageContext === 'my'){
-                Settings.data.manageContext = bots[Object.keys(bots)[0]];
+            if(new Date(Settings.data.lastCache).getDate() === new Date().getDate()) {
+                console.log('less than a day passed');
+                resolve();
+                return;
             }
 
-            console.log({msg: "Fetched bot data", bots});
+            /** @returns {Promise<Bots>} */
+            function fetchBotData(){
+                return new Promise((resolve, reject)=>{
+                    GM_xmlhttpRequest({
+                        method: "GET",
+                        url: `https://${GLAD_DOMAIN}/api/bots/my`,
+                        onload: function (data) {
+                            console.log('return');
+                            data = JSON.parse(data.responseText);
+                            if (!data.success) return reject(data);
+                
+                            let bots = data.bots;
+                            resolve(bots);
+                        },
+                        onerror: reject
+                    });
+                });
+            }
 
-            Settings.save();
-        }).catch((error)=>{
-            console.error(error);
-        })
+            fetchBotData().then((bots)=>{
+                Settings.data.bots = bots;
+                Settings.data.lastCache = new Date();
+                
+                if(Object.keys(bots).length > 0 && Settings.data.manageContext === 'my'){
+                    Settings.data.manageContext = bots[Object.keys(bots)[0]];
+                }
 
-        
+                console.log({msg: "Fetched bot data", bots});
+
+                Settings.save();
+            }).catch((error)=>{
+                console.error(error);
+            }).finally(resolve);
+        });
     }
 }
 
@@ -225,24 +247,16 @@ function backpackUserscript(pathname){
             Modal.render(...modal);
         }
 
-        let payload = new FormData();
-        itemNames.forEach((item, index)=>{
-            payload.append(`items[${index}]`, item);
-        })
-        
-        console.log(payload);
-
         GM_xmlhttpRequest({
             method: "POST",
             url: `https://${GLAD_DOMAIN}/api/bots/${Settings.data.manageContext || "my"}/items/add`,
-            headers: { "Content-type" : "multipart/form-data" },
-            data: payload,
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({items: itemNames}),
             onload: function (data) {
                 try{
                     let response = JSON.parse(data.responseText);
                     console.log(response);
                     if (!response.success) throw response.error || "Unknown  Error";
-                    if (typeof response.results === 'object') throw 'Response is not an object';
 
                     const results = Object.entries(response.results);
                     if(!results.length) throw 'No items added, are you logged into gladiator?';
@@ -271,6 +285,8 @@ function backpackUserscript(pathname){
 
     function appendAddButtons(buttons, location){
         
+        const $buttonGroup = $('<div class="btn-group btn-group-sm"> </div>');
+
         buttons.forEach(button=>{
             const [name, selector] = button;
 
@@ -295,8 +311,12 @@ function backpackUserscript(pathname){
                 bulkAdd(toAdd);
             });
 
-            $(location).after($button);
+            $buttonGroup.append($button);
         })
+
+        $(location).after($buttonGroup);
+
+
         
     }
 
