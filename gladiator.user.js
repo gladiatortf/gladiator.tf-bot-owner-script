@@ -212,109 +212,102 @@ function addMatchButtons(){
     document.defaultView.jQuery('.fa-tags').parent().tooltip(); // VERY gross hack for tooltips
 }
 
-// TODO: To be added later, do not remove returns
-
-/*
-function effect(){
-    return;
-    let check;
-
-    appendCheck(".panel-body > .padded");
-    $(".panel-body > .padded").append(buttons.addAll);
-
-    buttons.addAll.on("click", ()=>{
-        check = buttons.check.find("input").val();
-        addItems("#unusual-pricelist > li", check)
-    });
-}
-
-function unusual(){
-    return;
-    let check;
-
-    appendCheck(".panel-body > .padded");
-    $(".panel-body > .padded").append(buttons.addAll);
-    $(".panel-body > .padded").append(buttons.addAllPriced);
-    $(".panel-body > .padded").append(buttons.addAUnPriced);
-
-    buttons.addAll.on("click", ()=>{
-        check = buttons.check.find("input").val();
-        addItems(".item-list.unusual-pricelist > li, .item-list.unusual-pricelist-missing > li", check)
-    });
-    buttons.addAllPriced.on("click", ()=>{
-        check = buttons.check.find("input").val();
-        addItems(".item-list.unusual-pricelist > li", check);
-    });
-    buttons.addAllUnPriced.on("click", ()=>{
-        check = buttons.check.find("input").val();
-        addItems(".item-list.unusual-pricelist-missing > li", check)
-    });
-}
-
-async function mergeAndAdd(newItems){
-    GM.getValue("items", "[]").then((val)=>{
-        GM.setValue("items", [...val, ...newItems]);
-        console.log([...val, ...newItems]);
-    });
-}
-
-function parseItemListItem($item){
-    let quality = $item.data("q_name");
-    let effect_id = $item.data("effect_id");
-    let craftable = $item.data("craftable");
-    let name = $item.prop("title") || $item.data("original-title");
-    let pathToImg = "";
-    
-    if($item.find(".item-icon").length){
-        let background_image = /(?<=url\().*?(?=\))/.exec($item.find(".item-icon").css("background-image"));
-        pathToImg = background_image.shift();
-    }
-
-    return {
-        quality,
-        effect_id,
-        craftable,
-        name,
-        pathToImg
-    }
-}
-
-
-
-async function appendCheck(selector){
-    $(selector).append(buttons.check);
-    if(new Boolean(await GM.getValue("check", false))){
-        buttons.check.click();
-    }
-    buttons.check.on("click", function(){
-        GM.setValue("check", $(this).val());
-    })
-}
-*/
-
-/**
- * Add items in bulk
- * @param {string | Array} input CSS selector of items to add or array of pre-made items to add 
- * @param {boolean} redirect True if extension is to redirect after adding the items 
- */
-/*
- function addItems(input, redirect = true){
-    let items = [];
-    if($(input).length > 0){
-        console.log("input");
-        $(input).each(function(){
-            items.push(parseItemListItem($(this)));
-        });
-        mergeAndAdd(items);
-    }else if(Array.isArray(input)){
-        
-    }else{
-        console.log("none");
-    }
-}*/
-
 
 function backpackUserscript(pathname){
+    function bulkAdd(itemNames){
+        //https://gladiator.tf/api/bots/%20/add
+        
+        const error = (msg)=>{
+            const modal = [
+                'Error',
+                msg
+            ]
+            Modal.render(...modal);
+        }
+
+        let payload = new FormData();
+        itemNames.forEach((item, index)=>{
+            payload.append(`items[${index}]`, item);
+        })
+        
+        console.log(payload);
+
+        GM_xmlhttpRequest({
+            method: "POST",
+            url: `https://${GLAD_DOMAIN}/api/bots/${Settings.data.manageContext || "my"}/add`,
+            headers: { "Content-type" : "multipart/form-data" },
+            data: payload,
+            onload: function (data) {
+                try{
+                    let response = JSON.parse(data.responseText);
+                    if (!response.success) throw response.error || "Unknown  Error";
+                    if (typeof response.results === 'object') throw 'Response is not an object';
+
+                    const results = Object.entries(response.results);
+                    if(!results.length) throw 'No items added, are you logged into gladiator?';
+
+                    let failedAdds = [];
+
+                    results.forEach(result =>{
+                        const [item, success] = result;
+
+                        if(!success) failedAdds.push(item);
+                    });
+
+                    let msg =   failedAdds.length === 0         ? 
+                                'All items successfully added'  : 
+                                `Some items failed to be added (${results.length - failedAdds.length}/${results.length} Successful): ${failedAdds.join(', ')}`;
+                    
+                    Modal.render('Adding Items', msg);
+
+                }catch(ex){
+                    error(`Error while making request to gladiator: ${ex}`);
+                }
+            },
+            onerror: error
+        });
+    };
+
+    function appendAddButtons(buttons, location){
+
+        buttons.forEach(button=>{
+            const [name, selector] = button;
+
+            const $button = $(`<a class="btn btn-variety q-440-text-1 active">${name}</a>`);
+            $button.on('click', ()=>{
+
+                let toAdd = [];
+
+                if(!$(selector).is('table')){
+                    $(selector).find('li').each(function(){
+                        toAdd.push($(this).prop("title") || $(this).data("original-title"));
+                    });
+                }else{
+                    $(selector).find('th').each(function(){
+                        toAdd.push($(this).text())
+                    })
+                }
+                console.log(toAdd);
+            });
+
+            $(location).after($button);
+        })
+        
+    }
+
+    function effect(){
+       
+    }
+
+    function unusual(){
+        appendAddButtons([
+            ['Add All', '.unusual-pricelist, .unusual-pricelist-missing'], 
+            ['Add All Priced', '.unusual-pricelist'], 
+            ['Add All Unpriced', '.unusual-pricelist-missing']
+        ], '.input-group:first');
+    }
+
+
     function settings(){
 
         const modal = [
@@ -386,13 +379,13 @@ function backpackUserscript(pathname){
     }
 
     
-
-    
     injectCSS(css.bptf);
 
     const patterns = {
         ".*":                           [settings, bpPopupAdd],
-        "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons]
+        "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons],
+        "effect\/":                     [effect],
+        "unusual\/":                    [unusual]
     };
     try {
         execOnRegexMatch(patterns, pathname);
