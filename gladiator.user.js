@@ -335,6 +335,67 @@ function backpackUserscript(pathname){
     }
 
 
+
+    function pricelist(){
+        const last = $('#pricelist-pagination-container a:contains("Last")').attr('href');  
+        const totalPages = parseInt(last.split("(")[1].split(")")[0]);
+
+        const waitOnPageToLoad = (page)=>{
+            return new Promise((resolve)=>{
+                const check = ()=>$('#pricelistContainer > li:first > li').attr('style');
+
+                let beforeReloadStyle = page === 1 ? null : check();
+                document.defaultView.setCurrentPage(page);
+
+                let reloadCheck = setInterval(()=>{ 
+                    if(beforeReloadStyle !== check()){
+                        clearInterval(reloadCheck);
+                        resolve();
+                    }
+                }, 1000);
+            });
+        }
+
+        const loadAll = () => {
+            return new Promise(async (resolve)=>{
+                if($('#pricelist').is('table')){
+                    // Spreadsheet view script
+                    // not gonna do this rn its a mess
+
+                } else {
+                    // Grid view script
+                    let items = [];
+                    let iterator = 1;
+                    while(iterator <= totalPages){
+                        await waitOnPageToLoad(iterator);
+                        $('#pricelistContainer').find(".item")
+                                                .each(function(){
+                                                    const price = $(this);
+                                                    items.push(price.find('.name').text());
+                                                });
+                        iterator++;
+                    }
+                    resolve(items);
+                }
+            });
+        }
+
+        const $add = $('<a class="btn btn-variety q-440-text-1">Add All</a>');
+        const $addBlock = $('<a class="btn btn-variety q-440-text-1 disabled">Waiting...</a>').hide();
+        $add.on('click', () => {
+            $add.hide();
+            $addBlock.show();
+            loadAll().then((items)=>{
+                console.log(items);
+                $add.show();
+                $addBlock.hide();
+            });
+        });
+
+        $('#pricelist-filters').after($add).after($addBlock);
+    }
+
+
     function settings(){
 
         const modal = [
@@ -412,7 +473,8 @@ function backpackUserscript(pathname){
         ".*":                           [settings, bpPopupAdd],
         "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons],
         "effect\/":                     [effect],
-        "unusual\/":                    [unusual]
+        "unusual\/":                    [unusual],
+        "pricelist":                    [pricelist] 
     };
     try {
         execOnRegexMatch(patterns, pathname);
@@ -471,6 +533,12 @@ let buttons = {};
             }
         }
     })
+}
+
+const weapons = ["Frying Pan", "Black Rose", "Conscientious Objector", "Shortstop", "Big Kill", "Sniper Rifle", "Flame Thrower", "Shotgun", "Bat Outta Hell", "Rocket Launcher", "Lugermorph", "Spy-cicle", "Grenade Launcher", "Minigun", "Air Strike", "Scattergun", "Batsaber", "Bushwacka", "Market Gardener", "Stickybomb Launcher", "Sticky Jumper", "Medi Gun", "Pistol", "Half-Zatoichi", "Widowmaker", "Vaccinator", "Original", "Bat", "Classic", "Gunslinger", "Cow Mangler 5000", "Pretty Boy's Pocket Pistol", "Crusader's Crossbow", "Diamondback", "Gloves of Running Urgently", "Fists", "Righteous Bison", "Tomislav", "Homewrecker", "Force-A-Nature", "Phlogistinator", "Eyelander", "Beggar's Bazooka", "Eviction Notice", "Black Box", "Boston Basher", "Quick-Fix", "Solemn Vow", "Eureka Effect", "Kritzkrieg", "Fists of Steel", "Huntsman", "SMG", "Shovel", "Knife", "Loose Cannon", "Scottish Handshake", "Fortified Compound", "Powerjack", "Conniver's Kunai", "Neon Annihilator", "Rescue Ranger", "Flare Gun", "Wrap Assassin", "Vita-Saw", "Brass Beast", "Escape Plan", "Degreaser", "Sharpened Volcano Fragment", "Pomson 6000", "Wrench", "Manmelter", "Baby Face's Blaster", "Bazaar Bargain", "Huo-Long Heater", "Back Scatter", "Machina", "Cleaner's Carbine", "C.A.P.P.E.R", "Fan O'War", "Shooting Star", "L'Etranger", "Postal Pummeler", "Short Circuit", "Ullapool Caber", "Winger", "Ambassador", "Enforcer", "Natascha", "Overdose", "Sandman", "Scorch Shot", "Sun-on-a-Stick", "Loch-n-Load", "Flying Guillotine", "Backburner", "Equalizer", "Claidheamh Mòr", "Back Scratcher", "Bottle", "Persian Persuader", "Syringe Gun", "Third Degree", "Killing Gloves of Boxing", "Amputator", "AWPer Hand", "Frontier Justice", "Pain Train", "Ubersaw", "Disciplinary Action", "Holiday Punch", "Scottish Resistance", "Axtinguisher", "Jag", "Hitman's Heatmaker", "Nessie's Nine Iron", "Detonator", "Sydney Sleeper", "Tribalman's Shiv", "Soda Popper", "Direct Hit", "Mantreads", "Maul", "Rainblower", "Holy Mackerel", "Reserve Shooter", "Warrior's Spirit", "Candy Cane", "Blutsauger", "Southern Hospitality", "Shahanshah", "Lollichop", "Bread Bite", "Family Business", "Big Earner", "Liberty Launcher", "Scotsman's Skullcutter", "Sharp Dresser", "Revolver", "Your Eternal Reward", "Three-Rune Blade", "Chargin' Targe", "Nostromo Napalmer", "Iron Bomber", "Bonesaw", "Apoco-Fists", "Panic Attack", "Freedom Staff", "Prinny Machete", "Ham Shank", "Kukri", "Quickiebomb Launcher", "Fire Axe", "Unarmed Combat", "Wanga Prick", "Dragon's Fury", "Hot Hand", "Festive", "Botkiller"];
+    
+function isWeapon(name){
+    return weapons.some(weapon=>name.includes(weapon));
 }
 
 const injectCSS = (css) => $(document).find('head').append(`<style>${css}</style>`);
