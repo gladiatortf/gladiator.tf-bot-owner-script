@@ -383,9 +383,7 @@ function backpackUserscript(pathname){
 
     const patterns = {
         ".*":                           [settings, bpPopupAdd],
-        "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons],
-        "effect\/":                     [effect],
-        "unusual\/":                    [unusual]
+        "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons]
     };
     try {
         execOnRegexMatch(patterns, pathname);
