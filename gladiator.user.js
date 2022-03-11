@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.14
+// @version      1.15
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -385,24 +385,23 @@ function backpackUserscript(pathname){
         }
     }
 
-    reloadManageLink();
+    
+
+    
     injectCSS(css.bptf);
 
     const patterns = {
-        ".*": [settings],
-        "(\/stats)|(\/classifieds)": [bpPopupAdd, bpStatsAdd, addMatchButtons],
-        "effect\/":     [bpPopupAdd /*, effect */ ],
-        "unusual\/":    [bpPopupAdd /*, unusual */]
+        ".*":                           [settings, bpPopupAdd],
+        "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons],
+        "effect\/":                     [effect],
+        "unusual\/":                    [unusual]
     };
-
-    execOnRegexMatch(patterns, pathname);
-    
-    buttons = {
-        addAll: $(`<a class="btn btn-default" target="_blank"><i class="fas fa-plus-circle"></i>Add all</a>`),
-        addAllPriced: $(`<a class="btn btn-default" target="_blank"><i class="fas fa-plus-circle"></i>Add all priced unusuals</a>`),
-        addAllUnPriced: $(`<a class="btn btn-default" target="_blank"><i class="fas fa-plus-circle"></i>Add all unpriced unusuals</a>`),
-        check: $(`<div class="" target="_blank"><input type="checkbox" id="store-check">Store to Add Later</div>`)
+    try {
+        execOnRegexMatch(patterns, pathname);
+    }catch(ex){
+        console.error(ex);
     }
+    reloadManageLink();
 }
 
 function gladiatorUserscript(pathname){
