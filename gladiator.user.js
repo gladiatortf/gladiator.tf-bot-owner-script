@@ -234,12 +234,13 @@ function backpackUserscript(pathname){
 
         GM_xmlhttpRequest({
             method: "POST",
-            url: `https://${GLAD_DOMAIN}/api/bots/${Settings.data.manageContext || "my"}/add`,
+            url: `https://${GLAD_DOMAIN}/api/bots/${Settings.data.manageContext || "my"}/items/add`,
             headers: { "Content-type" : "multipart/form-data" },
             data: payload,
             onload: function (data) {
                 try{
                     let response = JSON.parse(data.responseText);
+                    console.log(response);
                     if (!response.success) throw response.error || "Unknown  Error";
                     if (typeof response.results === 'object') throw 'Response is not an object';
 
@@ -269,11 +270,14 @@ function backpackUserscript(pathname){
     };
 
     function appendAddButtons(buttons, location){
-
+        
         buttons.forEach(button=>{
             const [name, selector] = button;
 
-            const $button = $(`<a class="btn btn-variety q-440-text-1 active">${name}</a>`);
+            const hat = $(selector).find('h1').text();
+            const parse = (text) => `${text.replaceAll('\n', '').trim()} ${hat.replaceAll('\n', '').trim()}`;
+
+            const $button = $(`<a class="btn btn-variety q-440-text-1">${name}</a>`);
             $button.on('click', ()=>{
 
                 let toAdd = [];
@@ -283,11 +287,12 @@ function backpackUserscript(pathname){
                         toAdd.push($(this).prop("title") || $(this).data("original-title"));
                     });
                 }else{
-                    $(selector).find('th').each(function(){
-                        toAdd.push($(this).text())
+                    $(selector).find('tbody th').each(function(){
+                        toAdd.push(parse($(this).text()))
                     })
                 }
-                console.log(toAdd);
+                
+                bulkAdd(toAdd);
             });
 
             $(location).after($button);
@@ -296,14 +301,16 @@ function backpackUserscript(pathname){
     }
 
     function effect(){
-       
+        appendAddButtons([
+            ['Add All Priced', '.unusual-pricelist']
+        ], '.input-group:first');
     }
 
     function unusual(){
         appendAddButtons([
-            ['Add All', '.unusual-pricelist, .unusual-pricelist-missing'], 
+            ['Add All Unpriced', '.unusual-pricelist-missing'],
             ['Add All Priced', '.unusual-pricelist'], 
-            ['Add All Unpriced', '.unusual-pricelist-missing']
+            ['Add All', '.unusual-pricelist, .unusual-pricelist-missing']
         ], '.input-group:first');
     }
 
