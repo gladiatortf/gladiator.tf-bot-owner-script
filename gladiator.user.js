@@ -269,8 +269,10 @@ function backpackUserscript(pathname){
                         if(!success) failedAdds.push(item);
                     });
 
-                    let msg =   failedAdds.length === 0         ? 
-                                'All items successfully added'  : 
+                    const botName = Object.entries(Settings.data.bots).filter(([name, id]) => id === Settings.data.manageContext)[0][0];
+
+                    let msg =   failedAdds.length === 0                     ? 
+                                `${results.length} items successfully added to ${botName}`: 
                                 `Some items failed to be added (${results.length - failedAdds.length}/${results.length} Successful): ${failedAdds.join(', ')}`;
                     
                     Modal.render('Adding Items', msg);
@@ -395,7 +397,7 @@ function backpackUserscript(pathname){
         $add.on('click', () => {
             $($add, $check, $addBlock).toggle();
             loadAll($('#add-ks').is(':checked')).then((items)=>{
-                console.log(items);
+                bulkAdd(items);
                 $($add, $check, $addBlock).toggle();
             });
         });
@@ -423,16 +425,37 @@ function backpackUserscript(pathname){
 
     // The add on gladiator button on Stats
     function bpStatsAdd(){
+
+        const itemName = $('.stats-header-title').text().trim();
+
         const $addButton = $(`
-            <a class="price-box gladiator-context gladiatortf-add" data-postfix="/item/${encodeURIComponent($('.stats-header-title').text().trim())}/add" target="_blank" data-tip="top" data-original-title="Gladiator.tf">
+            <a class="price-box gladiator-context gladiatortf-add" data-postfix="/item/${encodeURIComponent(itemName)}/add" target="_blank" data-tip="top" data-original-title="Gladiator.tf">
                 <img src="https://gladiator.tf/favicon-96x96.png" alt="gladiator">
                 <div class="text">
                     <div class="value" style="font-size: 14px;">Add on Gladiator.tf</div>
                 </div>
             </a>
         `);
-    
+
         $('.price-boxes').append($addButton);
+
+        if(isWeapon(itemName)){
+            const $addKillstreak = $(`
+            <a class="price-box gladiatortf-add" data-tip="top" data-original-title="Gladiator.tf">
+                <img src="https://gladiator.tf/favicon-96x96.png" alt="gladiator">
+                <div class="text">
+                    <div class="value" style="font-size: 14px;">Add Killstreak Versions</div>
+                </div>
+            </a>`).on('click', () => {
+                const items = [itemName, ...generateKillstreaks(itemName)];
+                bulkAdd(items);
+            });
+            $('.price-boxes').append($addKillstreak);
+        }
+
+
+    
+        
     }
 
     // The add on gladiator button on popups
@@ -479,7 +502,8 @@ function backpackUserscript(pathname){
 
     const patterns = {
         ".*":                           [settings, bpPopupAdd],
-        "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons],
+        "(\/stats)|(\/classifieds)":    [addMatchButtons],
+        "\/stats":                      [bpStatsAdd],
         "effect\/":                     [effect],
         "unusual\/":                    [unusual],
         "pricelist":                    [pricelist] 
@@ -545,10 +569,15 @@ let buttons = {};
 
 
 function generateKillstreaks(baseName){
+    baseName = new String(baseName) .replace('Professional Killstreak ', '')
+                                    .replace('Specialized Killstreak ', '')
+                                    .replace('Killstreak ', '');
+    
+
     let nonItemRegex = new RegExp(/(Non-Craftable)|(Unusual)|(Strange)|(Normal)|(Unique)|(Genuine)|(Vintage)|(Collector's) (Australium )?/g);
     let ks = [];
-    let itemName = new String(baseName).replace(nonItemRegex, '').trim();
-    let nonItemName = new String(baseName).replace(itemName, '');
+    let itemName = baseName.replace(nonItemRegex, '').trim();
+    let nonItemName = baseName.replace(itemName, '');
     itemName = itemName.replace('The ', '');
     ks.push(`${nonItemName}Professional Killstreak ${itemName}`);
     ks.push(`${nonItemName}Specialized Killstreak ${itemName}`);
@@ -557,12 +586,13 @@ function generateKillstreaks(baseName){
 }
 
 const weapons = ["Frying Pan", "Black Rose", "Conscientious Objector", "Shortstop", "Big Kill", "Sniper Rifle", "Flame Thrower", "Shotgun", "Bat Outta Hell", "Rocket Launcher", "Lugermorph", "Spy-cicle", "Grenade Launcher", "Minigun", "Air Strike", "Scattergun", "Batsaber", "Bushwacka", "Market Gardener", "Stickybomb Launcher", "Sticky Jumper", "Medi Gun", "Pistol", "Half-Zatoichi", "Widowmaker", "Vaccinator", "Original", "Bat", "Classic", "Gunslinger", "Cow Mangler 5000", "Pretty Boy's Pocket Pistol", "Crusader's Crossbow", "Diamondback", "Gloves of Running Urgently", "Fists", "Righteous Bison", "Tomislav", "Homewrecker", "Force-A-Nature", "Phlogistinator", "Eyelander", "Beggar's Bazooka", "Eviction Notice", "Black Box", "Boston Basher", "Quick-Fix", "Solemn Vow", "Eureka Effect", "Kritzkrieg", "Fists of Steel", "Huntsman", "SMG", "Shovel", "Knife", "Loose Cannon", "Scottish Handshake", "Fortified Compound", "Powerjack", "Conniver's Kunai", "Neon Annihilator", "Rescue Ranger", "Flare Gun", "Wrap Assassin", "Vita-Saw", "Brass Beast", "Escape Plan", "Degreaser", "Sharpened Volcano Fragment", "Pomson 6000", "Wrench", "Manmelter", "Baby Face's Blaster", "Bazaar Bargain", "Huo-Long Heater", "Back Scatter", "Machina", "Cleaner's Carbine", "C.A.P.P.E.R", "Fan O'War", "Shooting Star", "L'Etranger", "Postal Pummeler", "Short Circuit", "Ullapool Caber", "Winger", "Ambassador", "Enforcer", "Natascha", "Overdose", "Sandman", "Scorch Shot", "Sun-on-a-Stick", "Loch-n-Load", "Flying Guillotine", "Backburner", "Equalizer", "Claidheamh Mòr", "Back Scratcher", "Bottle", "Persian Persuader", "Syringe Gun", "Third Degree", "Killing Gloves of Boxing", "Amputator", "AWPer Hand", "Frontier Justice", "Pain Train", "Ubersaw", "Disciplinary Action", "Holiday Punch", "Scottish Resistance", "Axtinguisher", "Jag", "Hitman's Heatmaker", "Nessie's Nine Iron", "Detonator", "Sydney Sleeper", "Tribalman's Shiv", "Soda Popper", "Direct Hit", "Mantreads", "Maul", "Rainblower", "Holy Mackerel", "Reserve Shooter", "Warrior's Spirit", "Candy Cane", "Blutsauger", "Southern Hospitality", "Shahanshah", "Lollichop", "Bread Bite", "Family Business", "Big Earner", "Liberty Launcher", "Scotsman's Skullcutter", "Sharp Dresser", "Revolver", "Your Eternal Reward", "Three-Rune Blade", "Chargin' Targe", "Nostromo Napalmer", "Iron Bomber", "Bonesaw", "Apoco-Fists", "Panic Attack", "Freedom Staff", "Prinny Machete", "Ham Shank", "Kukri", "Quickiebomb Launcher", "Fire Axe", "Unarmed Combat", "Wanga Prick", "Dragon's Fury", "Hot Hand", "Festive", "Botkiller"];    
+
 function isWeapon(name){
+    name = new String(name);
+    
+    if(name.includes('Kit') || name.includes('Fabricator')) return false;
     return weapons.some((weapon)=>{
-        if(new String(name).includes(weapon)){
-            console.log(`${name} ${weapon}`);
-        }
-        return new String(name).includes(weapon);
+        return name.includes(weapon);
     });
 }
 
