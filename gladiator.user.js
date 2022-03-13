@@ -324,7 +324,7 @@ function backpackUserscript(pathname){
 
     function effect(){
         appendAddButtons([
-            ['Add All Priced', '.unusual-pricelist']
+            ['Add All Priced', '#unusual-pricelist']
         ], '.input-group:first');
     }
 
