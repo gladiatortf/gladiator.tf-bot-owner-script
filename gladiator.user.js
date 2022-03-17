@@ -31,6 +31,26 @@ const svg = {
 
 const css = {
     bptf: `
+        .glad-fieldset {
+            padding: revert!important;
+            margin: revert!important;
+            border: 1px solid silver!important;
+            display: flex;
+            align-items: center;
+        }
+        .glad-fieldset > legend{
+            width: revert!important;
+            border-bottom: 0!important;
+            margin-bottom: revert!important;
+            font-size: 1.5rem;
+        }
+        .glad-fieldset span {
+            color: #B45309;
+        }
+        .glad-fieldset legend{
+            font-weight: 500;
+        }
+
         .li-gladiator-options a {
             display: flex!important;
             align-items: center;
@@ -68,7 +88,9 @@ const css = {
     `
 }
 
-/** @typedef {{ bots: Bots, lastCache: Date, manageContext: string }} SettingsData */
+let fieldset = `<fieldset class="glad-fieldset"><legend>Add to <span class="gladiator-bot-name">GladiatorTF Bot</span></legend></fieldset>`;
+
+/** @typedef {{ bots: Bots, lastCache: Date, manageContext: string, isKillstreakChecked: Boolean }} SettingsData */
 
 /** @typedef { Object<string, string> } Bots */
 
@@ -77,7 +99,8 @@ const Settings = {
     data: {
         manageContext: 'my',
         lastCache: new Date().setDate(new Date().getDate() - 1),
-        bots: {}
+        bots: {},
+        isKillstreakChecked: false
     },
     /** @returns {Promise<SettingsData>} */
     load: ()=>{
@@ -236,6 +259,19 @@ function addMatchButtons(){
 
 
 function backpackUserscript(pathname){
+
+    function killstreakCheck(){
+
+        const check = $(`<label class="checkbox-inline" style="margin-left: 10px;"><input type="checkbox" id="add-ks" ${Settings.data.isKillstreakChecked ? 'checked' : ''}>Add Killstreaks</label>`);
+       
+        check.find('input').on('click', function(){
+            Settings.data.isKillstreakChecked = $(this).is(':checked');
+            Settings.save();
+        })
+
+        return check;
+    }
+
     function bulkAdd(itemNames){
         //https://gladiator.tf/api/bots/%20/add
         
@@ -287,7 +323,7 @@ function backpackUserscript(pathname){
 
     function appendAddButtons(buttons, location){
         
-        const $buttonGroup = $('<div class="btn-group btn-group-sm"> </div>');
+        const $buttonGroup = $(`<fieldset class="glad-fieldset"><legend>Add to <span class="gladiator-bot-name">GladiatorTF Bot</span></legend><div class="btn-group btn-group-sm"> </div></fieldset>`);
 
         buttons.forEach(button=>{
             const [name, selector] = button;
@@ -313,7 +349,7 @@ function backpackUserscript(pathname){
                 bulkAdd(toAdd);
             });
 
-            $buttonGroup.append($button);
+            $buttonGroup.find('div').append($button);
         })
 
         $(location).after($buttonGroup);
@@ -330,9 +366,9 @@ function backpackUserscript(pathname){
 
     function unusual(){
         appendAddButtons([
-            ['Add All Unpriced', '.unusual-pricelist-missing'],
+            ['Add All', '.unusual-pricelist, .unusual-pricelist-missing'],
             ['Add All Priced', '.unusual-pricelist'], 
-            ['Add All', '.unusual-pricelist, .unusual-pricelist-missing']
+            ['Add All Unpriced', '.unusual-pricelist-missing']
         ], '.input-group:first');
     }
 
@@ -392,7 +428,7 @@ function backpackUserscript(pathname){
         }
 
         const $add = $(`<a class="btn btn-variety q-440-text-1">Add All</a>`);
-        const $check = $(`<label class="checkbox-inline"><input type="checkbox" id="add-ks">Add Killstreak Variants</label>`);
+        const $check = killstreakCheck();
         const $addBlock = $('<a class="btn btn-variety q-440-text-1 disabled">Waiting...</a>').hide();
         $add.on('click', () => {
             $($add, $check, $addBlock).toggle();
@@ -402,7 +438,12 @@ function backpackUserscript(pathname){
             });
         });
 
-        $('#pricelist-filters').after([$add, $check, $addBlock]);
+        
+        const $fieldset = $(fieldset);
+
+        $('#pricelist-filters').after($fieldset);
+
+        $fieldset.find('legend').after([$add, $check, $addBlock])
     }
 
 
@@ -436,26 +477,58 @@ function backpackUserscript(pathname){
                 </div>
             </a>
         `);
+        
+        const $fieldset = $(fieldset);
 
-        $('.price-boxes').append($addButton);
+        $fieldset.append($addButton);
 
-        if(isWeapon(itemName)){
-            const $addKillstreak = $(`
-            <a class="price-box gladiatortf-add" data-tip="top" data-original-title="Gladiator.tf">
+
+        const extractedName = [.../(?<=stats\/\w*\/)\w*(?=\/\w*)/.exec(location.href)][0];
+
+        let variants = [];
+
+        $('.stats-quality-list a:not(#btn-expand-list)').each(function(){
+            variants.push(`${$(this).text().trim()} ${extractedName}`);
+        });
+
+        const $addAllButton = $(`
+            <a class="price-box gladiatortf-add" data-original-title="Gladiator.tf">
                 <img src="https://gladiator.tf/favicon-96x96.png" alt="gladiator">
                 <div class="text">
-                    <div class="value" style="font-size: 14px;">Add Killstreak Versions</div>
+                    <div class="value" style="font-size: 14px;">Add All Variants</div>
                 </div>
-            </a>`).on('click', () => {
-                const items = [itemName, ...generateKillstreaks(itemName)];
-                bulkAdd(items);
+            </a>
+        `).on('click', function(){
+            
+            const variantsPayload = variants;
+
+            if($('#add-ks').is(':checked')){
+                variants.forEach(variant=>{
+                    variantsPayload.push(...generateKillstreaks(variant));
+                });
+            }
+            
+            bulkAdd(variantsPayload);
+        });
+
+        $fieldset.append($addAllButton);
+
+        if(isWeapon(itemName)){
+
+            const $check = killstreakCheck();
+            $addButton.on('click', () => {
+                if($check.is(':checked')) {
+                    const items = [...generateKillstreaks(itemName)];
+                    if(items.length > 0)
+                        bulkAdd(items);
+                }
             });
-            $('.price-boxes').append($addKillstreak);
+            $fieldset.append($check);
         }
 
 
-    
         
+        $('.price-boxes').append($fieldset);
     }
 
     // The add on gladiator button on popups
@@ -483,9 +556,13 @@ function backpackUserscript(pathname){
     function reloadManageLink(){
         const manageContext = Settings.data.manageContext || "my";
         
+        const botName = Settings.data.manageContext !== "my" ? Object.entries(Settings.data.bots).filter(([name, id]) => id === Settings.data.manageContext)[0][0] : 'GladiatorTF Bot';
+
         $('.gladiator-context').each(function(){
             $(this).attr('href', `https://${GLAD_DOMAIN}/manage/${manageContext}${$(this).data('postfix')}`); 
         });
+
+        $('.gladiator-bot-name').text(botName);
     }
 
 
