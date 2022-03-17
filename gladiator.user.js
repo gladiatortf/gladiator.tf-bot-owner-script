@@ -483,7 +483,7 @@ function backpackUserscript(pathname){
         $fieldset.append($addButton);
 
 
-        const extractedName = [.../(?<=stats\/\w*\/)\w*(?=\/\w*)/.exec(location.href)][0];
+        const extractedName = [.../(?<=stats\/\w*\/).*(?=\/Tradable)/.exec(location.href.replace('%20', ' '))][0];
 
         let variants = [];
 
@@ -646,7 +646,8 @@ let buttons = {};
 
 
 function generateKillstreaks(baseName){
-    baseName = new String(baseName) .replace('Professional Killstreak ', '')
+    baseName = new String(baseName) .replace('%20', ' ')
+                                    .replace('Professional Killstreak ', '')
                                     .replace('Specialized Killstreak ', '')
                                     .replace('Killstreak ', '');
     
