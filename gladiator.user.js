@@ -309,12 +309,14 @@ function backpackUserscript(pathname){
 
                     let msg =   failedAdds.length === 0                     ? 
                                 `${results.length} items successfully added to ${botName}`: 
-                                `Some items failed to be added (${results.length - failedAdds.length}/${results.length} Successful): ${failedAdds.join(', ')}`;
+                                `Some items failed to be added (${results.length - failedAdds.length}/${results.length} Successful):<br> ${failedAdds.join('<br>')}`;
                     
                     Modal.render('Adding Items', msg);
 
                 }catch(ex){
                     error(`Error while making request to gladiator: ${ex}`);
+                    console.error(data);
+                    console.error(ex);
                 }
             },
             onerror: error
@@ -483,11 +485,11 @@ function backpackUserscript(pathname){
         $fieldset.append($addButton);
 
 
-        const extractedName = [.../(?<=stats\/\w*\/).*(?=\/Tradable)/.exec(location.href.replace('%20', ' '))][0];
+        const extractedName = [.../(?<=stats\/\w*\/).*(?=\/Tradable)/.exec(decodeURI(location.href))][0];
 
         let variants = [];
 
-        $('.stats-quality-list a:not(#btn-expand-list)').each(function(){
+        $('.stats-quality-list a:not(#btn-expand-list):not(.untradable)').each(function(){
             variants.push(`${$(this).text().trim()} ${extractedName}`);
         });
 
@@ -646,8 +648,7 @@ let buttons = {};
 
 
 function generateKillstreaks(baseName){
-    baseName = new String(baseName) .replace('%20', ' ')
-                                    .replace('Professional Killstreak ', '')
+    baseName = new String(baseName) .replace('Professional Killstreak ', '')
                                     .replace('Specialized Killstreak ', '')
                                     .replace('Killstreak ', '');
     
