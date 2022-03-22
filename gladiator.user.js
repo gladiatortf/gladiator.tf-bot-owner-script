@@ -37,6 +37,7 @@ const css = {
             border: 1px solid silver!important;
             display: flex;
             align-items: center;
+            width: fit-content;
         }
         .glad-fieldset > legend{
             width: revert!important;
@@ -354,7 +355,9 @@ function backpackUserscript(pathname){
             $buttonGroup.find('div').append($button);
         })
 
-        $(location).after($buttonGroup);
+        const $container = $(`<div style="width:100%;"></div>`).append($buttonGroup);
+
+        $(location).after($container);
 
 
         
@@ -442,8 +445,9 @@ function backpackUserscript(pathname){
 
         
         const $fieldset = $(fieldset);
+        const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
 
-        $('#pricelist-filters').after($fieldset);
+        $('#pricelist-filters').after($container);
 
         $fieldset.find('legend').after([$add, $check, $addBlock])
     }
@@ -481,11 +485,11 @@ function backpackUserscript(pathname){
         `);
         
         const $fieldset = $(fieldset);
+        const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
+        $container.append($fieldset);        
+        
 
-        $fieldset.append($addButton);
-
-
-        const extractedName = [.../(?<=stats\/\w*\/).*(?=\/Tradable)/.exec(decodeURI(location.href))][0];
+        const extractedName = [.../(?<=stats\/.*\/).*(?=\/Tradable)/.exec(decodeURI(location.href))][0];
 
         let variants = [];
 
@@ -530,7 +534,7 @@ function backpackUserscript(pathname){
 
 
         
-        $('.price-boxes').append($fieldset);
+        $('.price-boxes').append($container);
     }
 
     // The add on gladiator button on popups
