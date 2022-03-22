@@ -633,18 +633,22 @@ let buttons = {};
         const regexObj = new RegExp(regex);
 
         if(regexObj.test(test)){
-            if(typeof toExecute === 'function')
-                toExecute(...payload);
-            if(Array.isArray(toExecute)){
-                for(let i = 0; i < toExecute.length; i++){
-                    if(typeof toExecute[i] === 'function'){
-                        let localPayload = [];
-                        if(Array.isArray(payload[i]))
-                            localPayload = payload[i];
+            try { //Errors of any function should prevent the rest from executing
+                if(typeof toExecute === 'function')
+                    toExecute(...payload);
+                if(Array.isArray(toExecute)){
+                    for(let i = 0; i < toExecute.length; i++){
+                        if(typeof toExecute[i] === 'function'){
+                            let localPayload = [];
+                            if(Array.isArray(payload[i]))
+                                localPayload = payload[i];
 
-                        toExecute[i](...localPayload);
+                            toExecute[i](...localPayload);
+                        }
                     }
                 }
+            } catch(ex) {
+                console.error(ex);
             }
         }
     })
