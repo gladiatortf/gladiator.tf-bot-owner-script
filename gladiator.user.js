@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.17
+// @version      1.18
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -496,12 +496,17 @@ function backpackUserscript(pathname){
         $container.append($fieldset);        
         
 
-        const extractedName = [.../(?<=stats\/.*\/).*(?=\/Tradable)/.exec(decodeURI(location.href))][0];
+        const extractedName = $('.listing-item > [data-name]').attr('data-name').trim();
 
         let variants = [];
 
         $('.stats-quality-list a:not(#btn-expand-list):not(.untradable)').each(function(){
-            variants.push(`${$(this).text().trim()} ${extractedName}`);
+            
+            let prefix = $(this).text().trim();
+            if(prefix.includes('Australium'))
+                prefix = "Strange Australium";
+            
+            variants.push(`${prefix} ${extractedName}`);
         });
 
         const $addAllButton = $(`
