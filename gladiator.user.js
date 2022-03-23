@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.16
+// @version      1.17
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -31,6 +31,27 @@ const svg = {
 
 const css = {
     bptf: `
+        .glad-fieldset {
+            padding: revert!important;
+            margin: revert!important;
+            border: 1px solid silver!important;
+            display: flex;
+            align-items: center;
+            width: fit-content;
+        }
+        .glad-fieldset > legend{
+            width: revert!important;
+            border-bottom: 0!important;
+            margin-bottom: revert!important;
+            font-size: 1.5rem;
+        }
+        .glad-fieldset span {
+            color: #B45309;
+        }
+        .glad-fieldset legend{
+            font-weight: 500;
+        }
+
         .li-gladiator-options a {
             display: flex!important;
             align-items: center;
@@ -52,6 +73,14 @@ const css = {
             cursor:pointer; 
             margin-top: 0;
         }
+
+        .glad-reload {
+            pointer-events: none;
+        }
+        .glad-reload button{
+            pointer-events:all;
+        }
+
         @media (max-width: 958.999px){
             path {
                 fill: #888!important;
@@ -60,7 +89,9 @@ const css = {
     `
 }
 
-/** @typedef {{ bots: Bots, lastCache: Date, manageContext: string }} SettingsData */
+let fieldset = `<fieldset class="glad-fieldset"><legend>Add to <span class="gladiator-bot-name">GladiatorTF Bot</span></legend></fieldset>`;
+
+/** @typedef {{ bots: Bots, lastCache: Date, manageContext: string, isKillstreakChecked: Boolean }} SettingsData */
 
 /** @typedef { Object<string, string> } Bots */
 
@@ -69,7 +100,8 @@ const Settings = {
     data: {
         manageContext: 'my',
         lastCache: new Date().setDate(new Date().getDate() - 1),
-        bots: {}
+        bots: {},
+        isKillstreakChecked: false
     },
     /** @returns {Promise<SettingsData>} */
     load: ()=>{
@@ -100,9 +132,22 @@ const Settings = {
             const $bots = $(`<div class="form-group">
                                 <label for="manageContext">Choose Your Bot</label>
                             </div>`);
+            const $reload = $(`<div class="form-group glad-reload"><button class="btn btn-variety ">Reload Bots</button></div>`);
+            $reload.on('click', (e)=>{
+                
+                Settings.data.lastCache = 0;
+                Settings.updateBotData().then(()=>{
+                    $parent.remove();
+                    $('#active-modal .modal-body').append(Settings.form.render());
+                    
+                })
+                e.preventDefault();
+            });
+
 
             (botAmount > 0 ? $select : $(`<span>You dont have any bots</span>`)).insertAfter($bots.find("label"));
             $parent.append($bots);
+            $bots.after($reload);
         
             return $parent;
         },
@@ -116,47 +161,48 @@ const Settings = {
         }
     },
     updateBotData: ()=>{
-
-        if(new Date(Settings.data.lastCache).getDate() === new Date().getDate()) {
-            console.log('less than a day passed');
-            return;
-        }
-
-        /** @returns {Promise<Bots>} */
-        function fetchBotData(){
-            return new Promise((resolve, reject)=>{
-                GM_xmlhttpRequest({
-                    method: "GET",
-                    url: `https://${GLAD_DOMAIN}/api/bots/my`,
-                    onload: function (data) {
-                        console.log('return');
-                        data = JSON.parse(data.responseText);
-                        if (!data.success) return reject(data);
+        return new Promise((resolve)=>{
             
-                        let bots = data.bots;
-                        resolve(bots);
-                    },
-                    onerror: reject
-                });
-            });
-        }
-
-        fetchBotData().then((bots)=>{
-            Settings.data.bots = bots;
-            Settings.data.lastCache = new Date();
-            
-            if(Object.keys(bots).length > 0 && Settings.data.manageContext === 'my'){
-                Settings.data.manageContext = bots[Object.keys(bots)[0]];
+            if(new Date(Settings.data.lastCache).getDate() === new Date().getDate()) {
+                console.log('less than a day passed');
+                resolve();
+                return;
             }
 
-            console.log({msg: "Fetched bot data", bots});
+            /** @returns {Promise<Bots>} */
+            function fetchBotData(){
+                return new Promise((resolve, reject)=>{
+                    GM_xmlhttpRequest({
+                        method: "GET",
+                        url: `https://${GLAD_DOMAIN}/api/bots/my`,
+                        onload: function (data) {
+                            console.log('return');
+                            data = JSON.parse(data.responseText);
+                            if (!data.success) return reject(data);
+                
+                            let bots = data.bots;
+                            resolve(bots);
+                        },
+                        onerror: reject
+                    });
+                });
+            }
 
-            Settings.save();
-        }).catch((error)=>{
-            console.error(error);
-        })
+            fetchBotData().then((bots)=>{
+                Settings.data.bots = bots;
+                Settings.data.lastCache = new Date();
+                
+                if(Object.keys(bots).length > 0 && Settings.data.manageContext === 'my'){
+                    Settings.data.manageContext = bots[Object.keys(bots)[0]];
+                }
 
-        
+                console.log({msg: "Fetched bot data", bots});
+
+                Settings.save();
+            }).catch((error)=>{
+                console.error(error);
+            }).finally(resolve);
+        });
     }
 }
 
@@ -214,6 +260,19 @@ function addMatchButtons(){
 
 
 function backpackUserscript(pathname){
+
+    function killstreakCheck(){
+
+        const check = $(`<label class="checkbox-inline" style="margin-left: 10px;"><input type="checkbox" id="add-ks" ${Settings.data.isKillstreakChecked ? 'checked' : ''}>Add Killstreaks</label>`);
+       
+        check.find('input').on('click', function(){
+            Settings.data.isKillstreakChecked = $(this).is(':checked');
+            Settings.save();
+        })
+
+        return check;
+    }
+
     function bulkAdd(itemNames){
         //https://gladiator.tf/api/bots/%20/add
         
@@ -225,23 +284,16 @@ function backpackUserscript(pathname){
             Modal.render(...modal);
         }
 
-        let payload = new FormData();
-        itemNames.forEach((item, index)=>{
-            payload.append(`items[${index}]`, item);
-        })
-        
-        console.log(payload);
-
         GM_xmlhttpRequest({
             method: "POST",
-            url: `https://${GLAD_DOMAIN}/api/bots/${Settings.data.manageContext || "my"}/add`,
-            headers: { "Content-type" : "multipart/form-data" },
-            data: payload,
+            url: `https://${GLAD_DOMAIN}/api/bots/${Settings.data.manageContext || "my"}/items/add`,
+            headers: { "Content-Type": "application/json" },
+            data: JSON.stringify({items: itemNames}),
             onload: function (data) {
                 try{
                     let response = JSON.parse(data.responseText);
+                    console.log(response);
                     if (!response.success) throw response.error || "Unknown  Error";
-                    if (typeof response.results === 'object') throw 'Response is not an object';
 
                     const results = Object.entries(response.results);
                     if(!results.length) throw 'No items added, are you logged into gladiator?';
@@ -254,14 +306,18 @@ function backpackUserscript(pathname){
                         if(!success) failedAdds.push(item);
                     });
 
-                    let msg =   failedAdds.length === 0         ? 
-                                'All items successfully added'  : 
-                                `Some items failed to be added (${results.length - failedAdds.length}/${results.length} Successful): ${failedAdds.join(', ')}`;
+                    const botName = Object.entries(Settings.data.bots).filter(([name, id]) => id === Settings.data.manageContext)[0][0];
+
+                    let msg =   failedAdds.length === 0                     ? 
+                                `${results.length} items successfully added to ${botName}`: 
+                                `Some items failed to be added (${results.length - failedAdds.length}/${results.length} Successful):<br> ${failedAdds.join('<br>')}`;
                     
                     Modal.render('Adding Items', msg);
 
                 }catch(ex){
                     error(`Error while making request to gladiator: ${ex}`);
+                    console.error(data);
+                    console.error(ex);
                 }
             },
             onerror: error
@@ -269,11 +325,16 @@ function backpackUserscript(pathname){
     };
 
     function appendAddButtons(buttons, location){
+        
+        const $buttonGroup = $(`<fieldset class="glad-fieldset"><legend>Add to <span class="gladiator-bot-name">GladiatorTF Bot</span></legend><div class="btn-group btn-group-sm"> </div></fieldset>`);
 
         buttons.forEach(button=>{
             const [name, selector] = button;
 
-            const $button = $(`<a class="btn btn-variety q-440-text-1 active">${name}</a>`);
+            const hat = $(selector).find('h1').text();
+            const parse = (text) => `${text.replaceAll('\n', '').trim()} ${hat.replaceAll('\n', '').trim()}`;
+
+            const $button = $(`<a class="btn btn-variety q-440-text-1">${name}</a>`);
             $button.on('click', ()=>{
 
                 let toAdd = [];
@@ -282,29 +343,119 @@ function backpackUserscript(pathname){
                     $(selector).find('li').each(function(){
                         toAdd.push($(this).prop("title") || $(this).data("original-title"));
                     });
+                    bulkAdd(toAdd);
                 }else{
-                    $(selector).find('th').each(function(){
-                        toAdd.push($(this).text())
+                    // there is some jank with list view, better to just make people use icon view
+                    Modal.render('Error', 'List view is unsupported, please switch to icon view');
+
+                    /* 
+                    $(selector).find('tbody th').each(function(){
+                        toAdd.push(parse($(this).text()))
                     })
+                    */
                 }
-                console.log(toAdd);
+                
+                
             });
 
-            $(location).after($button);
+            $buttonGroup.find('div').append($button);
         })
+
+        const $container = $(`<div style="width:100%;"></div>`).append($buttonGroup);
+
+        $(location).after($container);
+
+
         
     }
 
     function effect(){
-       
+        appendAddButtons([
+            ['Add All Priced', '#unusual-pricelist']
+        ], '.input-group:first');
     }
 
     function unusual(){
         appendAddButtons([
-            ['Add All', '.unusual-pricelist, .unusual-pricelist-missing'], 
+            ['Add All', '.unusual-pricelist, .unusual-pricelist-missing'],
             ['Add All Priced', '.unusual-pricelist'], 
             ['Add All Unpriced', '.unusual-pricelist-missing']
         ], '.input-group:first');
+    }
+
+
+
+    function pricelist(){
+        const last = $('#pricelist-pagination-container a:contains("Last")').attr('href');  
+        const totalPages = parseInt(last.split("(")[1].split(")")[0]);
+
+        const waitOnPageToLoad = (page)=>{
+            return new Promise((resolve)=>{
+                const check = ()=>{
+                    const $el = $('#pricelistContainer > li:first > li span.label');    
+                    return $el.attr('data-original-title') || $el.attr('title');
+                };
+
+                let beforeReloadStyle = page === 1 ? null : check();
+                document.defaultView.setCurrentPage(page);
+
+                let reloadCheck = setInterval(()=>{ 
+                    if(beforeReloadStyle !== check()){
+                        clearInterval(reloadCheck);
+                        resolve();
+                    }
+                }, 1000);
+            });
+        }
+
+        const loadAll = (addKS) => {
+            return new Promise(async (resolve)=>{
+                if($('#pricelist').is('table')){
+                    // Spreadsheet view script
+                    // not gonna do this rn its a mess
+                    Modal.render('Error', 'Spreadsheet view is unsupported, please switch to grid view');
+                } else {
+                    // Grid view script
+                    let items = [];
+                    let iterator = 1;
+                    while(iterator <= totalPages){
+                        await waitOnPageToLoad(iterator);
+                        $('#pricelistContainer').find(".item")
+                                                .each(function(){
+                                                    const price = $(this);
+                                                    let name = [price.find('.name').text()]; 
+                                                    
+                                                    if(addKS && isWeapon(name)) {
+                                                        name.push(...generateKillstreaks(name[0]));
+                                                    }
+
+                                                    items.push(...name);
+                                                });
+                        iterator++;
+                    }
+                    resolve(items);
+                }
+            });
+        }
+
+        const $add = $(`<a class="btn btn-variety q-440-text-1">Add All</a>`);
+        const $check = killstreakCheck();
+        const $addBlock = $('<a class="btn btn-variety q-440-text-1 disabled">Waiting...</a>').hide();
+        $add.on('click', () => {
+            $($add, $check, $addBlock).toggle();
+            loadAll($('#add-ks').is(':checked')).then((items)=>{
+                bulkAdd(items);
+                $($add, $check, $addBlock).toggle();
+            });
+        });
+
+        
+        const $fieldset = $(fieldset);
+        const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
+
+        $('#pricelist-filters').after($container);
+
+        $fieldset.find('legend').after([$add, $check, $addBlock])
     }
 
 
@@ -327,16 +478,70 @@ function backpackUserscript(pathname){
 
     // The add on gladiator button on Stats
     function bpStatsAdd(){
+
+        const itemName = $('.stats-header-title').text().trim();
+
         const $addButton = $(`
-            <a class="price-box gladiator-context gladiatortf-add" data-postfix="/item/${encodeURIComponent($('.stats-header-title').text().trim())}/add" target="_blank" data-tip="top" data-original-title="Gladiator.tf">
+            <a class="price-box gladiator-context gladiatortf-add" data-postfix="/item/${encodeURIComponent(itemName)}/add" target="_blank" data-tip="top" data-original-title="Gladiator.tf">
                 <img src="https://gladiator.tf/favicon-96x96.png" alt="gladiator">
                 <div class="text">
                     <div class="value" style="font-size: 14px;">Add on Gladiator.tf</div>
                 </div>
             </a>
         `);
-    
-        $('.price-boxes').append($addButton);
+        
+        const $fieldset = $(fieldset).append($addButton);
+
+        const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
+        $container.append($fieldset);        
+        
+
+        const extractedName = [.../(?<=stats\/.*\/).*(?=\/Tradable)/.exec(decodeURI(location.href))][0];
+
+        let variants = [];
+
+        $('.stats-quality-list a:not(#btn-expand-list):not(.untradable)').each(function(){
+            variants.push(`${$(this).text().trim()} ${extractedName}`);
+        });
+
+        const $addAllButton = $(`
+            <a class="price-box gladiatortf-add" data-original-title="Gladiator.tf">
+                <img src="https://gladiator.tf/favicon-96x96.png" alt="gladiator">
+                <div class="text">
+                    <div class="value" style="font-size: 14px;">Add All Variants</div>
+                </div>
+            </a>
+        `).on('click', function(){
+            
+            const variantsPayload = variants;
+
+            if($('#add-ks').is(':checked')){
+                variants.forEach(variant=>{
+                    variantsPayload.push(...generateKillstreaks(variant));
+                });
+            }
+            
+            bulkAdd(variantsPayload);
+        });
+
+        $fieldset.append($addAllButton);
+
+        if(isWeapon(itemName)){
+
+            const $check = killstreakCheck();
+            $addButton.on('click', () => {
+                if($check.is(':checked')) {
+                    const items = [...generateKillstreaks(itemName)];
+                    if(items.length > 0)
+                        bulkAdd(items);
+                }
+            });
+            $fieldset.append($check);
+        }
+
+
+        
+        $('.price-boxes').append($container);
     }
 
     // The add on gladiator button on popups
@@ -364,9 +569,13 @@ function backpackUserscript(pathname){
     function reloadManageLink(){
         const manageContext = Settings.data.manageContext || "my";
         
+        const botName = Settings.data.manageContext !== "my" ? Object.entries(Settings.data.bots).filter(([name, id]) => id === Settings.data.manageContext)[0][0] : 'GladiatorTF Bot';
+
         $('.gladiator-context').each(function(){
             $(this).attr('href', `https://${GLAD_DOMAIN}/manage/${manageContext}${$(this).data('postfix')}`); 
         });
+
+        $('.gladiator-bot-name').text(botName);
     }
 
 
@@ -383,7 +592,11 @@ function backpackUserscript(pathname){
 
     const patterns = {
         ".*":                           [settings, bpPopupAdd],
-        "(\/stats)|(\/classifieds)":    [bpStatsAdd, addMatchButtons]
+        "(\/stats)|(\/classifieds)":    [addMatchButtons],
+        "\/stats":                      [bpStatsAdd],
+        "effect\/":                     [effect],
+        "unusual\/":                    [unusual],
+        "pricelist":                    [pricelist] 
     };
     try {
         execOnRegexMatch(patterns, pathname);
@@ -427,21 +640,54 @@ let buttons = {};
         const regexObj = new RegExp(regex);
 
         if(regexObj.test(test)){
-            if(typeof toExecute === 'function')
-                toExecute(...payload);
-            if(Array.isArray(toExecute)){
-                for(let i = 0; i < toExecute.length; i++){
-                    if(typeof toExecute[i] === 'function'){
-                        let localPayload = [];
-                        if(Array.isArray(payload[i]))
-                            localPayload = payload[i];
+            try { //Errors of any function should not prevent the rest from executing
+                if(typeof toExecute === 'function')
+                    toExecute(...payload);
+                if(Array.isArray(toExecute)){
+                    for(let i = 0; i < toExecute.length; i++){
+                        if(typeof toExecute[i] === 'function'){
+                            let localPayload = [];
+                            if(Array.isArray(payload[i]))
+                                localPayload = payload[i];
 
-                        toExecute[i](...localPayload);
+                            toExecute[i](...localPayload);
+                        }
                     }
                 }
+            } catch(ex) {
+                console.error(ex);
             }
         }
     })
+}
+
+
+function generateKillstreaks(baseName){
+    baseName = new String(baseName) .replace('Professional Killstreak ', '')
+                                    .replace('Specialized Killstreak ', '')
+                                    .replace('Killstreak ', '');
+    
+
+    let nonItemRegex = new RegExp(/(Non-Craftable)|(Unusual)|(Strange)|(Normal)|(Unique)|(Genuine)|(Vintage)|(Collector's) (Australium )?/g);
+    let ks = [];
+    let itemName = baseName.replace(nonItemRegex, '').trim();
+    let nonItemName = baseName.replace(itemName, '');
+    itemName = itemName.replace('The ', '');
+    ks.push(`${nonItemName}Professional Killstreak ${itemName}`);
+    ks.push(`${nonItemName}Specialized Killstreak ${itemName}`);
+    ks.push(`${nonItemName}Killstreak ${itemName}`);
+    return ks;
+}
+
+const weapons = ["Frying Pan", "Black Rose", "Conscientious Objector", "Shortstop", "Big Kill", "Sniper Rifle", "Flame Thrower", "Shotgun", "Bat Outta Hell", "Rocket Launcher", "Lugermorph", "Spy-cicle", "Grenade Launcher", "Minigun", "Air Strike", "Scattergun", "Batsaber", "Bushwacka", "Market Gardener", "Stickybomb Launcher", "Sticky Jumper", "Medi Gun", "Pistol", "Half-Zatoichi", "Widowmaker", "Vaccinator", "Original", "Bat", "Classic", "Gunslinger", "Cow Mangler 5000", "Pretty Boy's Pocket Pistol", "Crusader's Crossbow", "Diamondback", "Gloves of Running Urgently", "Fists", "Righteous Bison", "Tomislav", "Homewrecker", "Force-A-Nature", "Phlogistinator", "Eyelander", "Beggar's Bazooka", "Eviction Notice", "Black Box", "Boston Basher", "Quick-Fix", "Solemn Vow", "Eureka Effect", "Kritzkrieg", "Fists of Steel", "Huntsman", "SMG", "Shovel", "Knife", "Loose Cannon", "Scottish Handshake", "Fortified Compound", "Powerjack", "Conniver's Kunai", "Neon Annihilator", "Rescue Ranger", "Flare Gun", "Wrap Assassin", "Vita-Saw", "Brass Beast", "Escape Plan", "Degreaser", "Sharpened Volcano Fragment", "Pomson 6000", "Wrench", "Manmelter", "Baby Face's Blaster", "Bazaar Bargain", "Huo-Long Heater", "Back Scatter", "Machina", "Cleaner's Carbine", "C.A.P.P.E.R", "Fan O'War", "Shooting Star", "L'Etranger", "Postal Pummeler", "Short Circuit", "Ullapool Caber", "Winger", "Ambassador", "Enforcer", "Natascha", "Overdose", "Sandman", "Scorch Shot", "Sun-on-a-Stick", "Loch-n-Load", "Flying Guillotine", "Backburner", "Equalizer", "Claidheamh Mòr", "Back Scratcher", "Bottle", "Persian Persuader", "Syringe Gun", "Third Degree", "Killing Gloves of Boxing", "Amputator", "AWPer Hand", "Frontier Justice", "Pain Train", "Ubersaw", "Disciplinary Action", "Holiday Punch", "Scottish Resistance", "Axtinguisher", "Jag", "Hitman's Heatmaker", "Nessie's Nine Iron", "Detonator", "Sydney Sleeper", "Tribalman's Shiv", "Soda Popper", "Direct Hit", "Mantreads", "Maul", "Rainblower", "Holy Mackerel", "Reserve Shooter", "Warrior's Spirit", "Candy Cane", "Blutsauger", "Southern Hospitality", "Shahanshah", "Lollichop", "Bread Bite", "Family Business", "Big Earner", "Liberty Launcher", "Scotsman's Skullcutter", "Sharp Dresser", "Revolver", "Your Eternal Reward", "Three-Rune Blade", "Chargin' Targe", "Nostromo Napalmer", "Iron Bomber", "Bonesaw", "Apoco-Fists", "Panic Attack", "Freedom Staff", "Prinny Machete", "Ham Shank", "Kukri", "Quickiebomb Launcher", "Fire Axe", "Unarmed Combat", "Wanga Prick", "Dragon's Fury", "Hot Hand", "Festive", "Botkiller"];    
+
+function isWeapon(name){
+    name = new String(name);
+    
+    if(name.includes('Kit') || name.includes('Fabricator')) return false;
+    return weapons.some((weapon)=>{
+        return name.includes(weapon);
+    });
 }
 
 const injectCSS = (css) => $(document).find('head').append(`<style>${css}</style>`);
