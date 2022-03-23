@@ -343,13 +343,19 @@ function backpackUserscript(pathname){
                     $(selector).find('li').each(function(){
                         toAdd.push($(this).prop("title") || $(this).data("original-title"));
                     });
+                    bulkAdd(toAdd);
                 }else{
+                    // there is some jank with list view, better to just make people use icon view
+                    Modal.render('Error', 'List view is unsupported, please switch to icon view');
+
+                    /* 
                     $(selector).find('tbody th').each(function(){
                         toAdd.push(parse($(this).text()))
                     })
+                    */
                 }
                 
-                bulkAdd(toAdd);
+                
             });
 
             $buttonGroup.find('div').append($button);
@@ -407,7 +413,7 @@ function backpackUserscript(pathname){
                 if($('#pricelist').is('table')){
                     // Spreadsheet view script
                     // not gonna do this rn its a mess
-
+                    Modal.render('Error', 'Spreadsheet view is unsupported, please switch to grid view');
                 } else {
                     // Grid view script
                     let items = [];
@@ -484,7 +490,8 @@ function backpackUserscript(pathname){
             </a>
         `);
         
-        const $fieldset = $(fieldset);
+        const $fieldset = $(fieldset).append($addButton);
+
         const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
         $container.append($fieldset);        
         
@@ -633,7 +640,7 @@ let buttons = {};
         const regexObj = new RegExp(regex);
 
         if(regexObj.test(test)){
-            try { //Errors of any function should prevent the rest from executing
+            try { //Errors of any function should not prevent the rest from executing
                 if(typeof toExecute === 'function')
                     toExecute(...payload);
                 if(Array.isArray(toExecute)){
