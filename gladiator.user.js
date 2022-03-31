@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.18
+// @version      1.19
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -82,7 +82,7 @@ const css = {
         }
 
         @media (max-width: 958.999px){
-            path {
+            .dropdown-menu path {
                 fill: #888!important;
             }
         }
@@ -473,7 +473,7 @@ function backpackUserscript(pathname){
                                         reloadManageLink();
                                     }));
                             
-        $('[href="/settings"]').parent().after($settings);
+        $('.dropdown-menu [href="/settings"]').parent().after($settings);
     }
 
     // The add on gladiator button on Stats
@@ -496,13 +496,20 @@ function backpackUserscript(pathname){
         $container.append($fieldset);        
         
 
-        const extractedName = $('.listing-item > [data-name]').attr('data-name').trim();
+        const extractedName = $('.stats-header-item > [data-base_name]').attr('data-base_name').trim();
 
         let variants = [];
 
         $('.stats-quality-list a:not(#btn-expand-list):not(.untradable)').each(function(){
             
             let prefix = $(this).text().trim();
+            const href = $(this).attr('href');
+            if( href.includes('Strange%20Decorated%20Weapon')   || 
+                href.includes('Decorated%20Weapon')             )
+                return;
+            if(prefix.includes('Hot') || prefix.includes('Isotope') || prefix.includes('Cool'))
+                return;
+
             if(prefix.includes('Australium'))
                 prefix = "Strange Australium";
             
