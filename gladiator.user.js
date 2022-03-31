@@ -504,13 +504,19 @@ function backpackUserscript(pathname){
             
             let prefix = $(this).text().trim();
             const href = $(this).attr('href');
-            if(href.includes('Decorated%20Weapon'))
+            if( href.includes('Minimal%20Wear')  ||
+                href.includes('Factory%20New')   ||
+                href.includes('Field-Tested')    || 
+                href.includes('Battle%20Scarred')||
+                href.includes('Well-Worn')       )
                 return;
+                
             if( prefix.includes('Hot')      || 
                 prefix.includes('Isotope')  || 
                 prefix.includes('Cool')     ||
                 prefix.includes('Energy')   )
                 return;
+
 
             if(prefix.includes('Australium'))
                 prefix = "Strange Australium";
