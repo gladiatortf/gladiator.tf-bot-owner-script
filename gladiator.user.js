@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.19
+// @version      1.20
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -504,10 +504,12 @@ function backpackUserscript(pathname){
             
             let prefix = $(this).text().trim();
             const href = $(this).attr('href');
-            if( href.includes('Strange%20Decorated%20Weapon')   || 
-                href.includes('Decorated%20Weapon')             )
+            if(href.includes('Decorated%20Weapon'))
                 return;
-            if(prefix.includes('Hot') || prefix.includes('Isotope') || prefix.includes('Cool'))
+            if( prefix.includes('Hot')      || 
+                prefix.includes('Isotope')  || 
+                prefix.includes('Cool')     ||
+                prefix.includes('Energy')   )
                 return;
 
             if(prefix.includes('Australium'))
