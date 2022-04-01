@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.20
+// @version      1.21
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -386,8 +386,7 @@ function backpackUserscript(pathname){
 
 
     function pricelist(){
-        const last = $('#pricelist-pagination-container a:contains("Last")').attr('href');  
-        const totalPages = parseInt(last.split("(")[1].split(")")[0]);
+        
 
         const waitOnPageToLoad = (page)=>{
             return new Promise((resolve)=>{
@@ -418,6 +417,8 @@ function backpackUserscript(pathname){
                     // Grid view script
                     let items = [];
                     let iterator = 1;
+                    const last = $('#pricelist-pagination-container a:contains("Last")').attr('href');  
+                    const totalPages = parseInt(last.split("(")[1].split(")")[0]);
                     while(iterator <= totalPages){
                         await waitOnPageToLoad(iterator);
                         $('#pricelistContainer').find(".item")
@@ -520,8 +521,11 @@ function backpackUserscript(pathname){
 
             if(prefix.includes('Australium'))
                 prefix = "Strange Australium";
-            
-            variants.push(`${prefix} ${extractedName}`);
+            if(prefix.includes('Unique') && !prefix.includes('Strange Unique')){
+                variants.push(`${extractedName}`);
+            }else{
+                variants.push(`${prefix} ${extractedName}`);
+            }
         });
 
         const $addAllButton = $(`
