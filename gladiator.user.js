@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.21
+// @version      1.23
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -502,7 +502,6 @@ function backpackUserscript(pathname){
         let variants = [];
 
         $('.stats-quality-list a:not(#btn-expand-list):not(.untradable)').each(function(){
-            
             let prefix = $(this).text().trim();
             const href = $(this).attr('href');
             if( href.includes('Minimal%20Wear')  ||
@@ -523,8 +522,9 @@ function backpackUserscript(pathname){
                 prefix = "Strange Australium";
             if(prefix.includes('Unique') && !prefix.includes('Strange Unique')){
                 variants.push(`${extractedName}`);
-            }else{
-                variants.push(`${prefix} ${extractedName}`);
+            }else {
+                prefix.includes('#') ?  variants.push(`${extractedName} ${prefix}`) : 
+                                        variants.push(`${prefix} ${extractedName}`);
             }
         });
 
@@ -551,7 +551,6 @@ function backpackUserscript(pathname){
         $fieldset.append($addAllButton);
 
         if(isWeapon(itemName)){
-
             const $check = killstreakCheck();
             $addButton.on('click', () => {
                 if($check.is(':checked')) {
