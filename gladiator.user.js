@@ -15,7 +15,7 @@
 // @downloadURL     https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
 
 // @run-at       document-end
-// @include      /(^https?:\/\/(.*\.)?((backpack\.tf)|(gladiator\.tf)|(backpacktf\.trade))(:\d+)?\/)/
+// @include      /(^https?:\/\/(.*\.)?((backpack\.tf)|(proxy\.gladiator\.tf)|(backpacktf\.trade))(:\d+)?\/)/
 // ==/UserScript==
 
 // Domain is defined, so it can be easily replaced with localhost for dev.
@@ -638,7 +638,7 @@ let buttons = {};
     'use strict';
     const entrypoints = {
         "(gladiator\.tf)|(127.0.0.1)": gladiatorUserscript,
-        "backpack\.tf|(gladiator\.tf:2053)|(127.0.0.1:2053)": backpackUserscript
+        "backpack\.tf|(proxy\.gladiator\.tf)|(127.0.0.1:2053)": backpackUserscript
     }
     Settings.load().then((data)=>{
         console.log(['Fetched data from storage', data]);
