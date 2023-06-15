@@ -1,3 +1,5 @@
+# ⚠️Gladiator.tf has shut down, this script is no longer functional⚠️
+
 # gladiator.tf script
 
 A script for owners of bots on [Gladiator.tf](https://gladiator.tf).
