@@ -339,7 +339,7 @@ function backpackUserscript(pathname){
 
                 let toAdd = [];
 
-                if(!$(selector).is('table')){
+                if($(selector).is('ul')){
                     $(selector).find('li').each(function(){
                         toAdd.push($(this).prop("title") || $(this).data("original-title"));
                     });
