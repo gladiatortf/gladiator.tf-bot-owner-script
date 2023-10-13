@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.24
+// @version      1.25
 // @description  A script for owners of bots on gladiator.tf
 // @author       manic, moder112
 // @grant        GM.getValue
@@ -210,7 +210,7 @@ const Settings = {
 
 function addMatchButtons(){
 
-    const keyEx = /(\d*(?= keys?))/;
+    const keyEx = /(\d*(.\d*)?(?= keys?))/;
     const refEx = /\d*(.\d*)?(?= ref)/;
 
     // Parse text into a price object
