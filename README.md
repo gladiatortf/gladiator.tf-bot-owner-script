@@ -9,8 +9,8 @@ A script for owners of bots on [Gladiator.tf](https://gladiator.tf).
 2. Open the [script in raw view](https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js).
 3. Install.
 
-### Google Chrome
-To use this in Chrome, you need to navigate to Manage Extensions page (chrome://extensions/) and enable Developer Mode.
+> [!WARNING] 
+> To use this in Chromium-based browsers (Google Chrome, Opera, Edge), you need to navigate to Manage Extensions page (chrome://extensions/) and enable Developer Mode.
 
 ## Current features
 
