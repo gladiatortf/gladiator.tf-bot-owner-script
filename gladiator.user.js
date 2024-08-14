@@ -438,29 +438,27 @@ function backpackUserscript(pathname){
         };
     
         const loadCurrentPage = (addKS) => {
-            return new Promise((resolve) => {
-                if ($('#pricelist').is('table')) {
-                    // Spreadsheet view script
-                    Modal.render('Error', 'Spreadsheet view is unsupported, please switch to grid view');
-                } else {
-                    // Grid view script
-                    let items = [];
-                    $('#pricelistContainer').find(".item")
-                        .each(function () {
-                            const price = $(this);
-                            let name = [price.find('.name').text()];
-    
-                            if (addKS && isWeapon(name)) {
-                                name.push(...generateKillstreaks(name[0]));
-                            }
-    
-                            items.push(...name);
-                        });
-                    resolve(items);
-                }
-            });
+            if ($('#pricelist').is('table')) {
+                // Spreadsheet view script
+                Modal.render('Error', 'Spreadsheet view is unsupported, please switch to grid view');
+                return [];
+            } else {
+                // Grid view script
+                let items = [];
+                $('#pricelistContainer').find(".item").each(function () {
+                    const price = $(this);
+                    let name = [price.find('.name').text()];
+        
+                    if (addKS && isWeapon(name)) {
+                        name.push(...generateKillstreaks(name[0]));
+                    }
+        
+                    items.push(...name);
+                });
+                return items;
+            }
         };
-    
+        
         const $add = $(`<a class="btn btn-variety q-440-text-1">Add All</a>`);
         const $addCurrent = $(`<a class="btn btn-variety q-440-text-1">Add Current Page</a>`);
         const $check = killstreakCheck();
@@ -476,10 +474,9 @@ function backpackUserscript(pathname){
     
         $addCurrent.on('click', () => {
             $($add, $addCurrent, $check, $addBlock).toggle();
-            loadCurrentPage($('#add-ks').is(':checked')).then((items) => {
-                bulkAdd(items);
-                $($add, $addCurrent, $check, $addBlock).toggle();
-            });
+            const items = loadCurrentPage($('#add-ks').is(':checked'));
+            bulkAdd(items);
+            $($add, $addCurrent, $check, $addBlock).toggle();
         });
     
         const $fieldset = $(fieldset);
