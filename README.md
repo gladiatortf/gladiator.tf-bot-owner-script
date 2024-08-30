@@ -17,20 +17,21 @@ A script for owners of bots on [Gladiator.tf](https://gladiator.tf).
 ### Shortcut to match a listing
 A button next to listings to match the user's price 
 
-![Match Listing](https://cdn.discordapp.com/attachments/794191871085772810/924384844161613834/unknown.png)
+![Match Listing](https://github.com/user-attachments/assets/58683104-e597-4cf2-b5c6-d33943e1a8af)
 
 ### Shortcut to add a single item
 A button on backpack.tf stats pages that links to the item on the Gladiator.tf panel.
 
-![Add on Gladiator.tf](https://cdn.discordapp.com/attachments/794191871085772810/924383994609557554/unknown.png)
+![Add on Gladiator.tf](https://github.com/user-attachments/assets/c0fad87b-fa01-49c5-a8b8-fa437f8be523)
 
 ### Shortcuts to add items in bulk
 **Please excercise caution when using this feature, you should also set max buy prices to minimize the risk of buying undesirable items.**
 
 #### Community Pricelist (Only Grid View)
-Add All items that match the current search, ability to add the killstreak variants for weapons.
+Add items that match the current search, ability to add the killstreak variants for weapons.
 
-![image](https://user-images.githubusercontent.com/18314046/160996184-888ef3bc-145e-4254-a570-030e96094f43.png)
+![Add all items](https://github.com/user-attachments/assets/0368fb04-69e5-49ac-93a1-f8447ba07c2a)
+
 #### Unusual (Only Icon View)
 Add All/Priced/Unpriced Unusuals on the page
 
