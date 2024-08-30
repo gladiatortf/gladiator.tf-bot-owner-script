@@ -3,16 +3,16 @@
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
 // @version      1.26
 // @description  A script for owners of bots on gladiator.tf
-// @author       manic, moder112
+// @author       GladiatorTF
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @grant        GM_xmlhttpRequest
 // @connect      gladiator.tf
 // @license      MIT
 
-// @homepageURL     https://github.com/mninc/gladiator.tf-bot-owner-script
-// @supportURL      https://github.com/mninc/gladiator.tf-bot-owner-script/issues
-// @downloadURL     https://github.com/mninc/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
+// @homepageURL     https://github.com/gladiatortf/gladiator.tf-bot-owner-script/
+// @supportURL      https://github.com/gladiatortf/gladiator.tf-bot-owner-script/issues
+// @downloadURL     https://github.com/gladiatortf/gladiator.tf-bot-owner-script/raw/master/gladiator.user.js
 
 // @run-at       document-end
 // @include      /(^https?:\/\/(.*\.)?((backpack\.tf)|(proxy\.gladiator\.tf)|(backpacktf\.trade))(:\d+)?\/)/
