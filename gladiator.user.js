@@ -386,7 +386,6 @@ function backpackUserscript(pathname){
 
 
     function pricelist() {
-
         const waitOnPageToLoad = (page) => {
             return new Promise((resolve) => {
                 const check = () => {
@@ -461,6 +460,9 @@ function backpackUserscript(pathname){
         
         const $add = $(`<a class="btn btn-variety q-440-text-1">Add All</a>`);
         const $addCurrent = $(`<a class="btn btn-variety q-440-text-1">Add Current Page</a>`);
+        const $addButtonGroup = $(`<div class="btn-group btn-group-sm"></div>`);
+        $addButtonGroup.append([$add, $addCurrent]);
+
         const $check = killstreakCheck();
         const $addBlock = $('<a class="btn btn-variety q-440-text-1 disabled">Waiting...</a>').hide();
     
@@ -484,7 +486,7 @@ function backpackUserscript(pathname){
     
         $('#pricelist-filters').after($container);
     
-        $fieldset.find('legend').after([$add, $addCurrent, $check, $addBlock]);
+        $fieldset.find('legend').after([$addButtonGroup, $check, $addBlock]);
     }
     
 
