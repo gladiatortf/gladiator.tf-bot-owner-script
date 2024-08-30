@@ -385,79 +385,108 @@ function backpackUserscript(pathname){
 
 
 
-    function pricelist(){
-        
+    function pricelist() {
 
-        const waitOnPageToLoad = (page)=>{
-            return new Promise((resolve)=>{
-                const check = ()=>{
-                    const $el = $('#pricelistContainer > li:first > li span.label');    
+        const waitOnPageToLoad = (page) => {
+            return new Promise((resolve) => {
+                const check = () => {
+                    const $el = $('#pricelistContainer > li:first > li span.label');
                     return $el.attr('data-original-title') || $el.attr('title');
                 };
-
+    
                 let beforeReloadStyle = page === 1 ? null : check();
                 document.defaultView.setCurrentPage(page);
-
-                let reloadCheck = setInterval(()=>{ 
-                    if(beforeReloadStyle !== check()){
+    
+                let reloadCheck = setInterval(() => {
+                    if (beforeReloadStyle !== check()) {
                         clearInterval(reloadCheck);
                         resolve();
                     }
                 }, 1000);
             });
-        }
-
+        };
+    
         const loadAll = (addKS) => {
-            return new Promise(async (resolve)=>{
-                if($('#pricelist').is('table')){
+            return new Promise(async (resolve) => {
+                if ($('#pricelist').is('table')) {
                     // Spreadsheet view script
-                    // not gonna do this rn its a mess
                     Modal.render('Error', 'Spreadsheet view is unsupported, please switch to grid view');
                 } else {
                     // Grid view script
                     let items = [];
                     let iterator = 1;
-                    const last = $('#pricelist-pagination-container a:contains("Last")').attr('href');  
+                    const last = $('#pricelist-pagination-container a:contains("Last")').attr('href');
                     const totalPages = parseInt(last.split("(")[1].split(")")[0]);
-                    while(iterator <= totalPages){
+                    while (iterator <= totalPages) {
                         await waitOnPageToLoad(iterator);
                         $('#pricelistContainer').find(".item")
-                                                .each(function(){
-                                                    const price = $(this);
-                                                    let name = [price.find('.name').text()]; 
-                                                    
-                                                    if(addKS && isWeapon(name)) {
-                                                        name.push(...generateKillstreaks(name[0]));
-                                                    }
-
-                                                    items.push(...name);
-                                                });
+                            .each(function () {
+                                const price = $(this);
+                                let name = [price.find('.name').text()];
+    
+                                if (addKS && isWeapon(name)) {
+                                    name.push(...generateKillstreaks(name[0]));
+                                }
+    
+                                items.push(...name);
+                            });
                         iterator++;
                     }
                     resolve(items);
                 }
             });
-        }
-
+        };
+    
+        const loadCurrentPage = (addKS) => {
+            if ($('#pricelist').is('table')) {
+                // Spreadsheet view script
+                Modal.render('Error', 'Spreadsheet view is unsupported, please switch to grid view');
+                return [];
+            } else {
+                // Grid view script
+                let items = [];
+                $('#pricelistContainer').find(".item").each(function () {
+                    const price = $(this);
+                    let name = [price.find('.name').text()];
+        
+                    if (addKS && isWeapon(name)) {
+                        name.push(...generateKillstreaks(name[0]));
+                    }
+        
+                    items.push(...name);
+                });
+                return items;
+            }
+        };
+        
         const $add = $(`<a class="btn btn-variety q-440-text-1">Add All</a>`);
+        const $addCurrent = $(`<a class="btn btn-variety q-440-text-1">Add Current Page</a>`);
         const $check = killstreakCheck();
         const $addBlock = $('<a class="btn btn-variety q-440-text-1 disabled">Waiting...</a>').hide();
+    
         $add.on('click', () => {
-            $($add, $check, $addBlock).toggle();
-            loadAll($('#add-ks').is(':checked')).then((items)=>{
+            $($add, $addCurrent, $check, $addBlock).toggle();
+            loadAll($('#add-ks').is(':checked')).then((items) => {
                 bulkAdd(items);
-                $($add, $check, $addBlock).toggle();
+                $($add, $addCurrent, $check, $addBlock).toggle();
             });
         });
-
-        
+    
+        $addCurrent.on('click', () => {
+            $($add, $addCurrent, $check, $addBlock).toggle();
+            const items = loadCurrentPage($('#add-ks').is(':checked'));
+            bulkAdd(items);
+            $($add, $addCurrent, $check, $addBlock).toggle();
+        });
+    
         const $fieldset = $(fieldset);
         const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
-
+    
         $('#pricelist-filters').after($container);
-
-        $fieldset.find('legend').after([$add, $check, $addBlock])
+    
+        $fieldset.find('legend').after([$add, $addCurrent, $check, $addBlock]);
     }
+    
 
 
     function settings(){
