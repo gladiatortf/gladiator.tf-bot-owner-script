@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gladiator.tf bot owner script
 // @namespace    https://steamcommunity.com/profiles/76561198320810968
-// @version      1.26
+// @version      1.27
 // @description  A script for owners of bots on gladiator.tf
 // @author       GladiatorTF
 // @grant        GM.getValue
@@ -66,11 +66,11 @@ const css = {
             fill: #333;
         }
         .gladiatortf-add > div {
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            cursor:pointer; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor:pointer;
             margin-top: 0;
         }
 
@@ -120,7 +120,7 @@ const Settings = {
     form: {
         render: ()=>{
             const $parent = $("<form id='glad-settings'></form>");
-        
+
             const botAmount = Object.keys(Settings.data.bots).length;
             const $select = $("<select id='manageContext' name='manageContext' class='form-control'></select>");
             console.log(Settings.data.bots);
@@ -128,18 +128,18 @@ const Settings = {
             Object.entries(Settings.data.bots).forEach((bot)=>{
                 $select.append(`<option value="${bot[1]}" ${Settings.data.manageContext === bot[1] ? 'selected' : ''}>${bot[0]}</option>`)
             })
-        
+
             const $bots = $(`<div class="form-group">
                                 <label for="manageContext">Choose Your Bot</label>
                             </div>`);
             const $reload = $(`<div class="form-group glad-reload"><button class="btn btn-variety ">Reload Bots</button></div>`);
             $reload.on('click', (e)=>{
-                
+
                 Settings.data.lastCache = 0;
                 Settings.updateBotData().then(()=>{
                     $parent.remove();
                     $('#active-modal .modal-body').append(Settings.form.render());
-                    
+
                 })
                 e.preventDefault();
             });
@@ -148,7 +148,7 @@ const Settings = {
             (botAmount > 0 ? $select : $(`<span>You dont have any bots</span>`)).insertAfter($bots.find("label"));
             $parent.append($bots);
             $bots.after($reload);
-        
+
             return $parent;
         },
         submit: ()=>{
@@ -162,7 +162,7 @@ const Settings = {
     },
     updateBotData: ()=>{
         return new Promise((resolve)=>{
-            
+
             if(new Date(Settings.data.lastCache).getDate() === new Date().getDate()) {
                 console.log('less than a day passed');
                 resolve();
@@ -179,7 +179,7 @@ const Settings = {
                             console.log('return');
                             data = JSON.parse(data.responseText);
                             if (!data.success) return reject(data);
-                
+
                             let bots = data.bots;
                             resolve(bots);
                         },
@@ -191,7 +191,7 @@ const Settings = {
             fetchBotData().then((bots)=>{
                 Settings.data.bots = bots;
                 Settings.data.lastCache = new Date();
-                
+
                 if(Object.keys(bots).length > 0 && Settings.data.manageContext === 'my'){
                     Settings.data.manageContext = bots[Object.keys(bots)[0]];
                 }
@@ -221,28 +221,28 @@ function addMatchButtons(){
         };
     }
 
-    // Do not match these 
+    // Do not match these
     const hasBlacklistedProperties = function(info){
-        if( info.data('paint_name')     !== undefined || 
-            info.data('spell_1')        !== undefined || 
-            info.data('part_price_1')   !== undefined || 
+        if( info.data('paint_name')     !== undefined ||
+            info.data('spell_1')        !== undefined ||
+            info.data('part_price_1')   !== undefined ||
             info.data('killstreaker')   !== undefined ||
             info.data('sheen')          !== undefined ){
             return true;
         }
-           
+
         return false;
     }
 
     // Spawns the actual button
     const spawnMatchButton = function (){
-        let element = $(this);   
+        let element = $(this);
         const info = element.find('.item');
         const price = parseListingPrice(info.data('listing_price') || "");
         const match = `<a data-postfix="/item/${encodeURIComponent((info.prop('title') || info.data('original-title')).trim())}?keys=${price.keys}&metal=${price.metal}&intent=${info.data('listing_intent')}" title="Match this user's price" target="_blank" class="btn btn-bottom btn-xs btn-success gladiator-context">
                 <i class="fa fa-sw fa-tags"></i>
             </a>`;
-        
+
         if(!hasBlacklistedProperties(info) || info.data('listing_intent') === "sell" )
             element.find(".listing-buttons").prepend(match);
     };
@@ -264,7 +264,7 @@ function backpackUserscript(pathname){
     function killstreakCheck(){
 
         const check = $(`<label class="checkbox-inline" style="margin-left: 10px;"><input type="checkbox" id="add-ks" ${Settings.data.isKillstreakChecked ? 'checked' : ''}>Add Killstreaks</label>`);
-       
+
         check.find('input').on('click', function(){
             Settings.data.isKillstreakChecked = $(this).is(':checked');
             Settings.save();
@@ -275,7 +275,7 @@ function backpackUserscript(pathname){
 
     function bulkAdd(itemNames){
         //https://gladiator.tf/api/bots/%20/add
-        
+
         const error = (msg)=>{
             const modal = [
                 'Error',
@@ -308,10 +308,10 @@ function backpackUserscript(pathname){
 
                     const botName = Object.entries(Settings.data.bots).filter(([name, id]) => id === Settings.data.manageContext)[0][0];
 
-                    let msg =   failedAdds.length === 0                     ? 
-                                `${results.length} items successfully added to ${botName}`: 
+                    let msg =   failedAdds.length === 0                     ?
+                                `${results.length} items successfully added to ${botName}`:
                                 `Some items failed to be added (${results.length - failedAdds.length}/${results.length} Successful):<br> ${failedAdds.join('<br>')}`;
-                    
+
                     Modal.render('Adding Items', msg);
 
                 }catch(ex){
@@ -325,7 +325,7 @@ function backpackUserscript(pathname){
     };
 
     function appendAddButtons(buttons, location){
-        
+
         const $buttonGroup = $(`<fieldset class="glad-fieldset"><legend>Add to <span class="gladiator-bot-name">GladiatorTF Bot</span></legend><div class="btn-group btn-group-sm"> </div></fieldset>`);
 
         buttons.forEach(button=>{
@@ -348,14 +348,14 @@ function backpackUserscript(pathname){
                     // there is some jank with list view, better to just make people use icon view
                     Modal.render('Error', 'List view is unsupported, please switch to icon view');
 
-                    /* 
+                    /*
                     $(selector).find('tbody th').each(function(){
                         toAdd.push(parse($(this).text()))
                     })
                     */
                 }
-                
-                
+
+
             });
 
             $buttonGroup.find('div').append($button);
@@ -366,7 +366,7 @@ function backpackUserscript(pathname){
         $(location).after($container);
 
 
-        
+
     }
 
     function effect(){
@@ -378,7 +378,7 @@ function backpackUserscript(pathname){
     function unusual(){
         appendAddButtons([
             ['Add All', '.unusual-pricelist, .unusual-pricelist-missing'],
-            ['Add All Priced', '.unusual-pricelist'], 
+            ['Add All Priced', '.unusual-pricelist'],
             ['Add All Unpriced', '.unusual-pricelist-missing']
         ], '.input-group:first');
     }
@@ -392,10 +392,10 @@ function backpackUserscript(pathname){
                     const $el = $('#pricelistContainer > li:first > li span.label');
                     return $el.attr('data-original-title') || $el.attr('title');
                 };
-    
+
                 let beforeReloadStyle = page === 1 ? null : check();
                 document.defaultView.setCurrentPage(page);
-    
+
                 let reloadCheck = setInterval(() => {
                     if (beforeReloadStyle !== check()) {
                         clearInterval(reloadCheck);
@@ -404,7 +404,7 @@ function backpackUserscript(pathname){
                 }, 1000);
             });
         };
-    
+
         const loadAll = (addKS) => {
             return new Promise(async (resolve) => {
                 if ($('#pricelist').is('table')) {
@@ -422,11 +422,11 @@ function backpackUserscript(pathname){
                             .each(function () {
                                 const price = $(this);
                                 let name = [price.find('.name').text()];
-    
+
                                 if (addKS && isWeapon(name)) {
                                     name.push(...generateKillstreaks(name[0]));
                                 }
-    
+
                                 items.push(...name);
                             });
                         iterator++;
@@ -435,7 +435,7 @@ function backpackUserscript(pathname){
                 }
             });
         };
-    
+
         const loadCurrentPage = (addKS) => {
             if ($('#pricelist').is('table')) {
                 // Spreadsheet view script
@@ -447,17 +447,17 @@ function backpackUserscript(pathname){
                 $('#pricelistContainer').find(".item").each(function () {
                     const price = $(this);
                     let name = [price.find('.name').text()];
-        
+
                     if (addKS && isWeapon(name)) {
                         name.push(...generateKillstreaks(name[0]));
                     }
-        
+
                     items.push(...name);
                 });
                 return items;
             }
         };
-        
+
         const $add = $(`<a class="btn btn-variety q-440-text-1">Add All</a>`);
         const $addCurrent = $(`<a class="btn btn-variety q-440-text-1">Add Current Page</a>`);
         const $addButtonGroup = $(`<div class="btn-group btn-group-sm"></div>`);
@@ -465,7 +465,7 @@ function backpackUserscript(pathname){
 
         const $check = killstreakCheck();
         const $addBlock = $('<a class="btn btn-variety q-440-text-1 disabled">Waiting...</a>').hide();
-    
+
         $add.on('click', () => {
             $($add, $addCurrent, $check, $addBlock).toggle();
             loadAll($('#add-ks').is(':checked')).then((items) => {
@@ -473,29 +473,29 @@ function backpackUserscript(pathname){
                 $($add, $addCurrent, $check, $addBlock).toggle();
             });
         });
-    
+
         $addCurrent.on('click', () => {
             $($add, $addCurrent, $check, $addBlock).toggle();
             const items = loadCurrentPage($('#add-ks').is(':checked'));
             bulkAdd(items);
             $($add, $addCurrent, $check, $addBlock).toggle();
         });
-    
+
         const $fieldset = $(fieldset);
         const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
-    
+
         $('#pricelist-filters').after($container);
-    
+
         $fieldset.find('legend').after([$addButtonGroup, $check, $addBlock]);
     }
-    
+
 
 
     function settings(){
 
         const modal = [
-            'Settings', 
-            Settings.form.render(), 
+            'Settings',
+            Settings.form.render(),
             $('<a class="btn btn-default" data-dismiss="modal">Save</a>')
         ];
         const $settings = $(`<li class="li-gladiator-options"><a>${svg.options} Bot Settings</a> </li>`);
@@ -504,7 +504,7 @@ function backpackUserscript(pathname){
                                         Settings.form.submit();
                                         reloadManageLink();
                                     }));
-                            
+
         $('.dropdown-menu [href="/settings"]').parent().after($settings);
     }
 
@@ -521,12 +521,12 @@ function backpackUserscript(pathname){
                 </div>
             </a>
         `);
-        
+
         const $fieldset = $(fieldset).append($addButton);
 
         const $container = $(`<div style="width:100%;"></div>`).append($fieldset);
-        $container.append($fieldset);        
-        
+        $container.append($fieldset);
+
 
         const extractedName = $('.stats-header-item > [data-base_name]').attr('data-base_name').trim();
 
@@ -537,13 +537,13 @@ function backpackUserscript(pathname){
             const href = $(this).attr('href');
             if( href.includes('Minimal%20Wear')  ||
                 href.includes('Factory%20New')   ||
-                href.includes('Field-Tested')    || 
+                href.includes('Field-Tested')    ||
                 href.includes('Battle%20Scarred')||
                 href.includes('Well-Worn')       )
                 return;
-                
-            if( prefix.includes('Hot')      || 
-                prefix.includes('Isotope')  || 
+
+            if( prefix.includes('Hot')      ||
+                prefix.includes('Isotope')  ||
                 prefix.includes('Cool')     ||
                 prefix.includes('Energy')   )
                 return;
@@ -554,7 +554,7 @@ function backpackUserscript(pathname){
             if(prefix.includes('Unique') && !prefix.includes('Strange Unique')){
                 variants.push(`${extractedName}`);
             }else {
-                prefix.includes('#') ?  variants.push(`${extractedName} ${prefix}`) : 
+                prefix.includes('#') ?  variants.push(`${extractedName} ${prefix}`) :
                                         variants.push(`${prefix} ${extractedName}`);
             }
         });
@@ -567,7 +567,7 @@ function backpackUserscript(pathname){
                 </div>
             </a>
         `).on('click', function(){
-            
+
             const variantsPayload = variants;
 
             if($('#add-ks').is(':checked')){
@@ -575,7 +575,7 @@ function backpackUserscript(pathname){
                     variantsPayload.push(...generateKillstreaks(variant));
                 });
             }
-            
+
             bulkAdd(variantsPayload);
         });
 
@@ -594,7 +594,7 @@ function backpackUserscript(pathname){
         }
 
 
-        
+
         $('.price-boxes').append($container);
     }
 
@@ -605,11 +605,11 @@ function backpackUserscript(pathname){
             let id = setInterval(function() {
                 if ($(self).next().hasClass("popover")) {
                     let popover = $(self).next().find("#popover-price-links");
-    
-                    if (popover.find(`a[href^='https://${GLAD_DOMAIN}']`).length == 0) {
-                        popover.append("<a class=\"btn btn-default btn-xs\" href=\"" + `https://${GLAD_DOMAIN}/manage/${Settings.data.manageContext}/item/${encodeURIComponent($($(self)[0]).data('original-title'))}/add` + "\" target=\"_blank\"><img src=\"https://gladiator.tf/favicon-96x96.png\" style='width: 16px;height: 16px;margin-top: -2px;'> Add on Gladiator.tf</a>");
+
+                    if (popover.find(`.gladiator-add-button`).length == 0) {
+                        popover.append("<a class=\"btn btn-default gladiator-add-button btn-xs\" href=\"" + `https://${GLAD_DOMAIN}/manage/${Settings.data.manageContext}/item/${encodeURIComponent($($(self)[0]).data('original-title'))}/add` + "\" target=\"_blank\"><img src=\"https://gladiator.tf/favicon-96x96.png\" style='width: 16px;height: 16px;margin-top: -2px;'> Add on Gladiator.tf</a>");
                     }
-    
+
                     clearInterval(id);
                 }
             }, 50);
@@ -622,11 +622,11 @@ function backpackUserscript(pathname){
     // After settings are changed we gotta update the links
     function reloadManageLink(){
         const manageContext = Settings.data.manageContext || "my";
-        
+
         const botName = Settings.data.manageContext !== "my" ? Object.entries(Settings.data.bots).filter(([name, id]) => id === Settings.data.manageContext)[0][0] : 'GladiatorTF Bot';
 
         $('.gladiator-context').each(function(){
-            $(this).attr('href', `https://${GLAD_DOMAIN}/manage/${manageContext}${$(this).data('postfix')}`); 
+            $(this).attr('href', `https://${GLAD_DOMAIN}/manage/${manageContext}${$(this).data('postfix')}`);
         });
 
         $('.gladiator-bot-name').text(botName);
@@ -636,12 +636,12 @@ function backpackUserscript(pathname){
     $('[title="Gladiator.tf Instant Trade"]').css('margin-right','3px');
 
     for (let i of document.getElementsByClassName('price-box')) {
-        if (i.origin === `https://${GLAD_DOMAIN}`) { 
+        if (i.origin === `https://${GLAD_DOMAIN}`) {
           return;
         }
     }
 
-    
+
     injectCSS(css.bptf);
 
     const patterns = {
@@ -650,7 +650,7 @@ function backpackUserscript(pathname){
         "\/stats":                      [bpStatsAdd],
         "effect\/":                     [effect],
         "unusual\/":                    [unusual],
-        "pricelist":                    [pricelist] 
+        "pricelist":                    [pricelist]
     };
     try {
         execOnRegexMatch(patterns, pathname);
@@ -673,7 +673,7 @@ let buttons = {};
     }
     Settings.load().then((data)=>{
         console.log(['Fetched data from storage', data]);
-        
+
         Settings.updateBotData();
         execOnRegexMatch(entrypoints, window.location.origin, [window.location.pathname]);
     });
@@ -683,8 +683,8 @@ let buttons = {};
 
 /** @typedef {Object<string, Function|Function[]>} MatchExec */
 /**
- * @param {MatchExec} matchAndExec 
- * @param {string} test 
+ * @param {MatchExec} matchAndExec
+ * @param {string} test
  * @param {any[]|any[][]} [payload]
  */
  function execOnRegexMatch(matchAndExec, test, payload = []){
@@ -720,7 +720,7 @@ function generateKillstreaks(baseName){
     baseName = new String(baseName) .replace('Professional Killstreak ', '')
                                     .replace('Specialized Killstreak ', '')
                                     .replace('Killstreak ', '');
-    
+
 
     let nonItemRegex = new RegExp(/(Non-Craftable)|(Unusual)|(Strange)|(Normal)|(Unique)|(Genuine)|(Vintage)|(Collector's) (Australium )?/g);
     let ks = [];
@@ -733,11 +733,11 @@ function generateKillstreaks(baseName){
     return ks;
 }
 
-const weapons = ["Frying Pan", "Black Rose", "Conscientious Objector", "Shortstop", "Big Kill", "Sniper Rifle", "Flame Thrower", "Shotgun", "Bat Outta Hell", "Rocket Launcher", "Lugermorph", "Spy-cicle", "Grenade Launcher", "Minigun", "Air Strike", "Scattergun", "Batsaber", "Bushwacka", "Market Gardener", "Stickybomb Launcher", "Sticky Jumper", "Medi Gun", "Pistol", "Half-Zatoichi", "Widowmaker", "Vaccinator", "Original", "Bat", "Classic", "Gunslinger", "Cow Mangler 5000", "Pretty Boy's Pocket Pistol", "Crusader's Crossbow", "Diamondback", "Gloves of Running Urgently", "Fists", "Righteous Bison", "Tomislav", "Homewrecker", "Force-A-Nature", "Phlogistinator", "Eyelander", "Beggar's Bazooka", "Eviction Notice", "Black Box", "Boston Basher", "Quick-Fix", "Solemn Vow", "Eureka Effect", "Kritzkrieg", "Fists of Steel", "Huntsman", "SMG", "Shovel", "Knife", "Loose Cannon", "Scottish Handshake", "Fortified Compound", "Powerjack", "Conniver's Kunai", "Neon Annihilator", "Rescue Ranger", "Flare Gun", "Wrap Assassin", "Vita-Saw", "Brass Beast", "Escape Plan", "Degreaser", "Sharpened Volcano Fragment", "Pomson 6000", "Wrench", "Manmelter", "Baby Face's Blaster", "Bazaar Bargain", "Huo-Long Heater", "Back Scatter", "Machina", "Cleaner's Carbine", "C.A.P.P.E.R", "Fan O'War", "Shooting Star", "L'Etranger", "Postal Pummeler", "Short Circuit", "Ullapool Caber", "Winger", "Ambassador", "Enforcer", "Natascha", "Overdose", "Sandman", "Scorch Shot", "Sun-on-a-Stick", "Loch-n-Load", "Flying Guillotine", "Backburner", "Equalizer", "Claidheamh Mòr", "Back Scratcher", "Bottle", "Persian Persuader", "Syringe Gun", "Third Degree", "Killing Gloves of Boxing", "Amputator", "AWPer Hand", "Frontier Justice", "Pain Train", "Ubersaw", "Disciplinary Action", "Holiday Punch", "Scottish Resistance", "Axtinguisher", "Jag", "Hitman's Heatmaker", "Nessie's Nine Iron", "Detonator", "Sydney Sleeper", "Tribalman's Shiv", "Soda Popper", "Direct Hit", "Mantreads", "Maul", "Rainblower", "Holy Mackerel", "Reserve Shooter", "Warrior's Spirit", "Candy Cane", "Blutsauger", "Southern Hospitality", "Shahanshah", "Lollichop", "Bread Bite", "Family Business", "Big Earner", "Liberty Launcher", "Scotsman's Skullcutter", "Sharp Dresser", "Revolver", "Your Eternal Reward", "Three-Rune Blade", "Chargin' Targe", "Nostromo Napalmer", "Iron Bomber", "Bonesaw", "Apoco-Fists", "Panic Attack", "Freedom Staff", "Prinny Machete", "Ham Shank", "Kukri", "Quickiebomb Launcher", "Fire Axe", "Unarmed Combat", "Wanga Prick", "Dragon's Fury", "Hot Hand", "Festive", "Botkiller"];    
+const weapons = ["Frying Pan", "Black Rose", "Conscientious Objector", "Shortstop", "Big Kill", "Sniper Rifle", "Flame Thrower", "Shotgun", "Bat Outta Hell", "Rocket Launcher", "Lugermorph", "Spy-cicle", "Grenade Launcher", "Minigun", "Air Strike", "Scattergun", "Batsaber", "Bushwacka", "Market Gardener", "Stickybomb Launcher", "Sticky Jumper", "Medi Gun", "Pistol", "Half-Zatoichi", "Widowmaker", "Vaccinator", "Original", "Bat", "Classic", "Gunslinger", "Cow Mangler 5000", "Pretty Boy's Pocket Pistol", "Crusader's Crossbow", "Diamondback", "Gloves of Running Urgently", "Fists", "Righteous Bison", "Tomislav", "Homewrecker", "Force-A-Nature", "Phlogistinator", "Eyelander", "Beggar's Bazooka", "Eviction Notice", "Black Box", "Boston Basher", "Quick-Fix", "Solemn Vow", "Eureka Effect", "Kritzkrieg", "Fists of Steel", "Huntsman", "SMG", "Shovel", "Knife", "Loose Cannon", "Scottish Handshake", "Fortified Compound", "Powerjack", "Conniver's Kunai", "Neon Annihilator", "Rescue Ranger", "Flare Gun", "Wrap Assassin", "Vita-Saw", "Brass Beast", "Escape Plan", "Degreaser", "Sharpened Volcano Fragment", "Pomson 6000", "Wrench", "Manmelter", "Baby Face's Blaster", "Bazaar Bargain", "Huo-Long Heater", "Back Scatter", "Machina", "Cleaner's Carbine", "C.A.P.P.E.R", "Fan O'War", "Shooting Star", "L'Etranger", "Postal Pummeler", "Short Circuit", "Ullapool Caber", "Winger", "Ambassador", "Enforcer", "Natascha", "Overdose", "Sandman", "Scorch Shot", "Sun-on-a-Stick", "Loch-n-Load", "Flying Guillotine", "Backburner", "Equalizer", "Claidheamh Mòr", "Back Scratcher", "Bottle", "Persian Persuader", "Syringe Gun", "Third Degree", "Killing Gloves of Boxing", "Amputator", "AWPer Hand", "Frontier Justice", "Pain Train", "Ubersaw", "Disciplinary Action", "Holiday Punch", "Scottish Resistance", "Axtinguisher", "Jag", "Hitman's Heatmaker", "Nessie's Nine Iron", "Detonator", "Sydney Sleeper", "Tribalman's Shiv", "Soda Popper", "Direct Hit", "Mantreads", "Maul", "Rainblower", "Holy Mackerel", "Reserve Shooter", "Warrior's Spirit", "Candy Cane", "Blutsauger", "Southern Hospitality", "Shahanshah", "Lollichop", "Bread Bite", "Family Business", "Big Earner", "Liberty Launcher", "Scotsman's Skullcutter", "Sharp Dresser", "Revolver", "Your Eternal Reward", "Three-Rune Blade", "Chargin' Targe", "Nostromo Napalmer", "Iron Bomber", "Bonesaw", "Apoco-Fists", "Panic Attack", "Freedom Staff", "Prinny Machete", "Ham Shank", "Kukri", "Quickiebomb Launcher", "Fire Axe", "Unarmed Combat", "Wanga Prick", "Dragon's Fury", "Hot Hand", "Festive", "Botkiller"];
 
 function isWeapon(name){
     name = new String(name);
-    
+
     if(name.includes('Kit') || name.includes('Fabricator')) return false;
     return weapons.some((weapon)=>{
         return name.includes(weapon);
